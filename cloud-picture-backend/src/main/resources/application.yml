@@ -10,7 +10,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/cloud_picture
     username: root
-    password: 021225
+    password: "021225"
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
