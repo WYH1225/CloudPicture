@@ -1,5 +1,5 @@
 <template>
-  <a-config-provider :locale="locale">
+  <a-config-provider :locale="appLocale">
     <div id="app">
       <BasicLayout />
     </div>
@@ -9,18 +9,17 @@
 
 <script setup lang="ts">
 import BasicLayout from '@/layouts/BasicLayout.vue';
-import { healthUsingGet } from './api/mainController';
 import { useLoginUserStore } from './stores/useLoginUserStore';
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
+
 dayjs.locale('zh-cn');
+const appLocale = zhCN
+
 const loginUserStore = useLoginUserStore();
 loginUserStore.fetchLoginUser()
 
-healthUsingGet().then((res) => {
-  console.log(res);
-});
 </script>
 
 <style scoped>
