@@ -1,4 +1,4 @@
-package com.pic.cloudpicturebackend.model.dto;
+package com.pic.cloudpicturebackend.model.dto.user;
 
 import lombok.Data;
 

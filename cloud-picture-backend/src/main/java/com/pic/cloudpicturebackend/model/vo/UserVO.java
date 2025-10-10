@@ -6,10 +6,10 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 已登陆用户视图（脱敏）
+ * 用户视图（脱敏）
  */
 @Data
-public class UserLoginVO implements Serializable {
+public class UserVO implements Serializable {
     /**
      * id
      */
@@ -41,19 +41,9 @@ public class UserLoginVO implements Serializable {
     private String userRole;
 
     /**
-     * 编辑时间
-     */
-    private Date editTime;
-
-    /**
      * 创建时间
      */
     private Date createTime;
-
-    /**
-     * 更新时间
-     */
-    private Date updateTime;
 
     private static final long serialVersionUID = 1L;
 }
