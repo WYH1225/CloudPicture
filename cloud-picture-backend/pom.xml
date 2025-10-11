@@ -29,9 +29,16 @@
             <artifactId>mybatis-plus-boot-starter</artifactId>
             <version>3.5.9</version>
         </dependency>
+        <!-- mybatis-plus 分页插件 -->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-jsqlparser-4.9</artifactId>
+        </dependency>
+        <!-- 对象存储 -->
+        <dependency>
+            <groupId>com.qcloud</groupId>
+            <artifactId>cos_api</artifactId>
+            <version>5.6.227</version>
         </dependency>
         <!-- hutool工具类 -->
         <dependency>
