@@ -46,7 +46,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { h, ref } from 'vue'
+import { computed, h, ref } from 'vue'
 import { HomeOutlined, LogoutOutlined } from '@ant-design/icons-vue'
 import { MenuProps, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
@@ -55,7 +55,7 @@ import { userLogoutUsingPost } from '@/api/userController.ts'
 
 const loginUserStore = useLoginUserStore()
 
-const items = ref<MenuProps['items']>([
+const originItems = [
   {
     key: '/',
     icon: () => h(HomeOutlined),
@@ -63,16 +63,32 @@ const items = ref<MenuProps['items']>([
     title: '主页',
   },
   {
-    key: '/about',
-    label: '关于',
-    title: '关于',
+    key: '/admin/userManage',
+    label: '用户管理',
+    title: '用户管理',
   },
   {
     key: 'others',
     label: h('a', { href: 'https://baidu.com', target: '_blank' }, '百度'),
     title: '百度',
   },
-])
+]
+
+// 根据权限过滤菜单项
+const filterMenus = (meuns = [] as MenuProps['items']) => {
+  return meuns?.filter((menu) => {
+    // 仅管理员可见
+    if (menu?.key?.startsWith('/admin')) {
+      const loginUser = loginUserStore.loginUser
+      if (!loginUser.userRole || loginUser.userRole !== 'admin') {
+        return false
+      }
+    }
+    return true
+  })
+}
+
+const items = computed(() => filterMenus(originItems))
 
 const router = useRouter()
 // 当前要高亮的菜单项
@@ -119,5 +135,9 @@ const doLogout = async () => {
 
 .logo {
   height: 48px;
+}
+
+.user-login-status {
+  cursor: pointer;
 }
 </style>
