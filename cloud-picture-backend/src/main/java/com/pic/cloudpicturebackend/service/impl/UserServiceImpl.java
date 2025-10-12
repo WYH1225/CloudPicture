@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
-* @author wyh
 * @description 针对表【user(用户)】的数据库操作Service实现
 */
 @Service

@@ -5,12 +5,10 @@ server:
 spring:
   application:
     name: cloud-picture-backend
-    # 数据库配置
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/cloud_picture
-    username: root
-    password: "021225"
+  # 开放文件上传大小限制
+  servlet:
+    multipart:
+      max-file-size: 5MB
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
