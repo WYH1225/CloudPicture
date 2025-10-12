@@ -19,6 +19,7 @@
       :data-source="dataList"
       :pagination="pagination"
       @change="doTableChange"
+
     >
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'userAvatar'">
@@ -52,34 +53,42 @@ const columns = [
   {
     title: 'id',
     dataIndex: 'id',
+    align: 'center',
   },
   {
     title: '账号',
     dataIndex: 'userAccount',
+    align: 'center',
   },
   {
     title: '用户名',
     dataIndex: 'userName',
+    align: 'center',
   },
   {
     title: '头像',
     dataIndex: 'userAvatar',
+    align: 'center',
   },
   {
     title: '简介',
     dataIndex: 'userProfile',
+    align: 'center',
   },
   {
     title: '用户角色',
     dataIndex: 'userRole',
+    align: 'center',
   },
   {
     title: '创建时间',
     dataIndex: 'createTime',
+    align: 'center',
   },
   {
     title: '操作',
     key: 'action',
+    align: 'center',
   },
 ]
 

@@ -21,16 +21,18 @@
         <div class="user-login-status">
           <div v-if="loginUserStore.loginUser.id">
             <a-dropdown>
-              <a-space>
+              <a-space class="userAvatarName">
                 <a-avatar :src="loginUserStore.loginUser.userAvatar" />
                 {{ loginUserStore.loginUser.userName ?? '无名' }}
               </a-space>
               <template #overlay>
-                <a-menu>
+                <a-menu style="margin: 3px 0 0 15px">
                   <a-menu-item @click="doLogout">
-                    <a href="javascript:;">
-                      <LogoutOutlined />
-                      退出登录
+                    <a href="javascript:">
+                      <a-space>
+                        <LogoutOutlined />
+                        退出登录
+                      </a-space>
                     </a>
                   </a-menu-item>
                 </a-menu>
@@ -75,8 +77,8 @@ const originItems = [
 ]
 
 // 根据权限过滤菜单项
-const filterMenus = (meuns = [] as MenuProps['items']) => {
-  return meuns?.filter((menu) => {
+const filterMenus = (menus = [] as MenuProps['items']) => {
+  return menus?.filter((menu) => {
     // 仅管理员可见
     if (menu?.key?.startsWith('/admin')) {
       const loginUser = loginUserStore.loginUser
@@ -88,7 +90,7 @@ const filterMenus = (meuns = [] as MenuProps['items']) => {
   })
 }
 
-const items = computed(() => filterMenus(originItems))
+const items = computed<MenuProps['items']>(() => filterMenus(originItems))
 
 const router = useRouter()
 // 当前要高亮的菜单项
@@ -137,7 +139,16 @@ const doLogout = async () => {
   height: 48px;
 }
 
-.user-login-status {
-  cursor: pointer;
+.userAvatarName {
+  padding: 7px 5px;
+  line-height: normal;
+  border-radius: 5px;
+  transition: background-color 0.3s;
 }
+
+.userAvatarName:hover {
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
 </style>
