@@ -201,7 +201,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         String sortField = pictureQueryRequest.getSortField();
         String sortOrder = pictureQueryRequest.getSortOrder();
         // 从多字段中搜索
-        if (StrUtil.isNotBlank(sortField)) {
+        if (StrUtil.isNotBlank(searchText)) {
             // 需要拼接的查询条件
             queryWrapper.and(
                     qw -> qw.like("name", searchText)
