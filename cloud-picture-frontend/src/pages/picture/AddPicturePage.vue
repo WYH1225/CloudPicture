@@ -1,10 +1,18 @@
 <template>
   <div id="addPicturePage">
-    <h2 style="margin-bottom: 16px">创建图片</h2>
+    <h2 style="margin-bottom: 16px">
+      {{ route.query?.id ? '编辑图片' : '创建图片' }}
+    </h2>
     <!-- 图片上传组件 -->
     <PictureUpload :picture="picture" :onSuccess="onSuccess" />
     <!-- 图片信息表单 -->
-    <a-form v-if="picture" name="basic" layout="vertical" :model="pictureForm" @finish="handleSubmit">
+    <a-form
+      v-if="picture"
+      name="basic"
+      layout="vertical"
+      :model="pictureForm"
+      @finish="handleSubmit"
+    >
       <a-form-item name="name" label="名称">
         <a-input v-model:value="pictureForm.name" placeholder="请输入名称" allow-clear />
       </a-form-item>
@@ -35,7 +43,9 @@
         />
       </a-form-item>
       <a-form-item>
-        <a-button type="primary" html-type="submit" style="width: 100%">创建</a-button>
+        <a-button type="primary" html-type="submit" style="width: 100%">
+          {{ route.query?.id ? '修改' : '创建' }}
+        </a-button>
       </a-form-item>
     </a-form>
   </div>
@@ -45,12 +55,15 @@
 import PictureUpload from '@/components/PictureUpload.vue'
 import { onMounted, reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
-import { editPictureUsingPost, listPictureTagCategoryUsingGet } from '@/api/pictureController.ts'
-import { useRouter } from 'vue-router'
+import {
+  editPictureUsingPost,
+  getPictureVoByIdUsingGet,
+  listPictureTagCategoryUsingGet,
+} from '@/api/pictureController.ts'
+import { useRoute, useRouter } from 'vue-router'
 
 const picture = ref<API.PictureVO>()
 const pictureForm = reactive<API.PictureEditRequest>({})
-const router = useRouter()
 
 /**
  * 上传成功回调
@@ -60,6 +73,8 @@ const onSuccess = (newPicture: API.PictureVO) => {
   picture.value = newPicture
   pictureForm.name = newPicture.name
 }
+
+const router = useRouter()
 
 /**
  * 表单提交
@@ -114,6 +129,31 @@ const getTagCategoryOptions = async () => {
 
 onMounted(() => {
   getTagCategoryOptions()
+})
+
+const route = useRoute()
+
+// 获取老数据
+const getOldPicture = async () => {
+  // 获取图片 id
+  const id = route.query?.id
+  if (id) {
+    const res = await getPictureVoByIdUsingGet({
+      id,
+    })
+    if (res.data.code === 0 && res.data.data) {
+      const data = res.data.data
+      picture.value = data
+      pictureForm.name = data.name
+      pictureForm.introduction = data.introduction
+      pictureForm.category = data.category
+      pictureForm.tags = data.tags
+    }
+  }
+}
+
+onMounted(() => {
+  getOldPicture()
 })
 </script>
 
