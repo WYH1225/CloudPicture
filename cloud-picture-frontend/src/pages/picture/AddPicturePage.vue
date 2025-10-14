@@ -123,7 +123,7 @@ const getTagCategoryOptions = async () => {
       }
     })
   } else {
-    message.error('创建失败: ' + res.data.message)
+    message.error('获取标签和分类列表失败: ' + res.data.message)
   }
 }
 
