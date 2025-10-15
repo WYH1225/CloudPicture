@@ -12,6 +12,9 @@ import com.pic.cloudpicturebackend.exception.BusinessException;
 import com.pic.cloudpicturebackend.exception.ErrorCode;
 import com.pic.cloudpicturebackend.exception.ThrowUtils;
 import com.pic.cloudpicturebackend.manager.FileManager;
+import com.pic.cloudpicturebackend.manager.upload.FilePictureUpload;
+import com.pic.cloudpicturebackend.manager.upload.PictureUploadTemplate;
+import com.pic.cloudpicturebackend.manager.upload.UrlPictureUpload;
 import com.pic.cloudpicturebackend.model.dto.file.UploadPictureResult;
 import com.pic.cloudpicturebackend.model.dto.picture.PictureQueryRequest;
 import com.pic.cloudpicturebackend.model.dto.picture.PictureReviewRequest;
@@ -40,12 +43,15 @@ import java.util.stream.Collectors;
 */
 @Service
 public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> implements PictureService{
-
-    @Resource
-    private FileManager fileManager;
     
     @Resource
     private UserService userService;
+
+    @Resource
+    private FilePictureUpload filePictureUpload;
+
+    @Resource
+    private UrlPictureUpload urlPictureUpload;
 
     /**
      * 校验图片
@@ -72,15 +78,15 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
     /**
      * 上传图片
      *
-     * @param multipartFile
+     * @param inputSource
      * @param pictureUploadRequest
      * @param loginUser
      * @return
      */
     @Override
-    public PictureVO uploadPicture(MultipartFile multipartFile, PictureUploadRequest pictureUploadRequest, User loginUser) {
+    public PictureVO uploadPicture(Object inputSource, PictureUploadRequest pictureUploadRequest, User loginUser) {
         // 校验参数
-        ThrowUtils.throwIf(multipartFile == null, ErrorCode.PARAMS_ERROR);
+        ThrowUtils.throwIf(loginUser == null, ErrorCode.PARAMS_ERROR);
         // 判断是新增还是删除
         Long pictureId = null;
         if (pictureUploadRequest != null) {
@@ -98,7 +104,12 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         // 上传图片, 得到图片信息
         // 按照用户 id 划分目录
         String uploadPathPrefix = String.format("public/%s", loginUser.getId());
-        UploadPictureResult uploadPictureResult = fileManager.uploadPicture(multipartFile, uploadPathPrefix);
+        // 根据 inputSource 的类型区分上传方式
+        PictureUploadTemplate pictureUploadTemplate = filePictureUpload;
+        if (inputSource instanceof String) {
+            pictureUploadTemplate = urlPictureUpload;
+        }
+        UploadPictureResult uploadPictureResult = pictureUploadTemplate.uploadPicture(inputSource, uploadPathPrefix);
         // 构造 Picture
         Picture picture = new Picture();
         picture.setUrl(uploadPictureResult.getUrl());

@@ -4,21 +4,14 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.RandomUtil;
-import com.pic.cloudpicturebackend.common.ResultUtils;
 import com.pic.cloudpicturebackend.config.CosClientConfig;
 import com.pic.cloudpicturebackend.exception.BusinessException;
 import com.pic.cloudpicturebackend.exception.ErrorCode;
 import com.pic.cloudpicturebackend.exception.ThrowUtils;
 import com.pic.cloudpicturebackend.model.dto.file.UploadPictureResult;
-import com.qcloud.cos.COSClient;
-import com.qcloud.cos.model.COSObject;
-import com.qcloud.cos.model.GetObjectRequest;
-import com.qcloud.cos.model.PutObjectRequest;
 import com.qcloud.cos.model.PutObjectResult;
 import com.qcloud.cos.model.ciModel.persistence.ImageInfo;
-import com.qcloud.cos.model.ciModel.persistence.OriginalInfo;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,10 +20,14 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
+/**
+ * 文件上传服务
+ * @deprecated 已废弃，改为使用 upload 包的模板方法优化
+ */
 @Slf4j
 @Service
+@Deprecated
 public class FileManager {
 
     @Resource
