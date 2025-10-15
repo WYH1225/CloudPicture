@@ -8,6 +8,7 @@
         enter-button="搜索"
         size="large"
         @search="doSearch"
+        allow-clear
       />
     </div>
 
