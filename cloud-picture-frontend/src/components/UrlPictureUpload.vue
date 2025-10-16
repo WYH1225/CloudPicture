@@ -6,9 +6,9 @@
         style="width: calc(100% - 120px)"
         placeholder="请输入图片url"
       />
-      <a-button type="primary" style="width: 120px" :loading="loading" @click="handleUpload"
-        >提交</a-button
-      >
+      <a-button type="primary" style="width: 120px" :loading="loading" @click="handleUpload">
+        提交
+      </a-button>
     </a-input-group>
     <div class="img-wrapper">
       <img v-if="picture?.url" :src="picture?.url" alt="avatar" />
