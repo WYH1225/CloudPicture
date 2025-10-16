@@ -46,7 +46,7 @@ public class PictureController {
      * @param request
      * @return
      */
-    @PostMapping("/upload/url")
+    @PostMapping("/upload")
     // @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<PictureVO> uploadPicture(@RequestPart("file") MultipartFile multipartFile, PictureUploadRequest pictureUploadRequest, HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
@@ -57,7 +57,7 @@ public class PictureController {
     /**
      * 通过 URL 上传图片（可重新上传）
      */
-    @PostMapping("/upload")
+    @PostMapping("/upload/url")
     public BaseResponse<PictureVO> uploadPictureByUrl(@RequestBody PictureUploadRequest pictureUploadRequest, HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
         String fileUrl = pictureUploadRequest.getFileUrl();

@@ -130,37 +130,7 @@ export async function updatePictureUsingPost(
   })
 }
 
-/** uploadPictureByUrl POST /api/picture/upload */
-export async function uploadPictureByUrlUsingPost(
-  body: API.PictureUploadRequest,
-  options?: { [key: string]: any }
-) {
-  return request<API.BaseResponsePictureVO_>('/api/picture/upload', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: body,
-    ...(options || {}),
-  })
-}
-
-/** uploadPictureByBatch POST /api/picture/upload/batch */
-export async function uploadPictureByBatchUsingPost(
-  body: API.PictureUploadByBatchRequest,
-  options?: { [key: string]: any }
-) {
-  return request<API.BaseResponseInt_>('/api/picture/upload/batch', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: body,
-    ...(options || {}),
-  })
-}
-
-/** uploadPicture POST /api/picture/upload/url */
+/** uploadPicture POST /api/picture/upload */
 export async function uploadPictureUsingPost(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
   params: API.uploadPictureUsingPOSTParams,
@@ -190,13 +160,43 @@ export async function uploadPictureUsingPost(
     }
   })
 
-  return request<API.BaseResponsePictureVO_>('/api/picture/upload/url', {
+  return request<API.BaseResponsePictureVO_>('/api/picture/upload', {
     method: 'POST',
     params: {
       ...params,
     },
     data: formData,
     requestType: 'form',
+    ...(options || {}),
+  })
+}
+
+/** uploadPictureByBatch POST /api/picture/upload/batch */
+export async function uploadPictureByBatchUsingPost(
+  body: API.PictureUploadByBatchRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseInt_>('/api/picture/upload/batch', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  })
+}
+
+/** uploadPictureByUrl POST /api/picture/upload/url */
+export async function uploadPictureByUrlUsingPost(
+  body: API.PictureUploadRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponsePictureVO_>('/api/picture/upload/url', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
     ...(options || {}),
   })
 }

@@ -16,12 +16,16 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * URL 图片上传
  */
 @Service
 public class UrlPictureUpload extends PictureUploadTemplate {
+
+    // 图片后缀类型，防止并发问题
+    private final AtomicReference<String> typeRef = new AtomicReference<>();
 
     @Override
     protected void validPicture(Object inputSource) {
@@ -30,7 +34,7 @@ public class UrlPictureUpload extends PictureUploadTemplate {
         ThrowUtils.throwIf(StrUtil.isBlank(fileUrl), ErrorCode.PARAMS_ERROR, "文件地址为空");
         // 校验 url 的格式
         try {
-            new URL(fileUrl);
+            new URL(fileUrl);   // 验证是否是合法的 URL
         } catch (MalformedURLException e) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件地址格式错误");
         }
@@ -47,9 +51,18 @@ public class UrlPictureUpload extends PictureUploadTemplate {
             String contentType = httpResponse.header("Content-Type");
             // 不为空, 才校验是否合法
             if (StrUtil.isNotBlank(contentType)) {
+                // 在校验图片类型的时候先将它的类型保存
+                // 允许的图片类型
+                boolean isPermit = false;
                 final List<String> ALLOW_CONTENT_TYPES = Arrays.asList("image/jpeg", "image/png", "image/jpg", "image/webp");
-                ThrowUtils.throwIf(!ALLOW_CONTENT_TYPES.contains(contentType),
-                        ErrorCode.PARAMS_ERROR, "文件类型错误");
+                for (String imgType : ALLOW_CONTENT_TYPES) {
+                    if (imgType.equals(contentType.toLowerCase())) {
+                        typeRef.set("." + imgType.substring(imgType.indexOf("/") + 1));
+                        isPermit = true;
+                        break;
+                    }
+                }
+                ThrowUtils.throwIf(!isPermit, ErrorCode.PARAMS_ERROR, "文件类型错误");
             }
             // 文件存在, 文件大小检验
             String contentLengthStr = httpResponse.header("Content-Length");
@@ -68,7 +81,12 @@ public class UrlPictureUpload extends PictureUploadTemplate {
     @Override
     protected String getOriginFilename(Object inputSource) {
         String fileUrl = (String) inputSource;
-        return FileUtil.mainName(fileUrl);
+        String suffix = FileUtil.getSuffix(fileUrl);
+        final List<String> ALLOW_SUFFIX = Arrays.asList("jpg", "jpeg", "png", "webp");
+        if (!ALLOW_SUFFIX.contains(suffix)) {
+            fileUrl = fileUrl + typeRef.get();
+        }
+        return FileUtil.getName(fileUrl);
     }
 
     @Override
