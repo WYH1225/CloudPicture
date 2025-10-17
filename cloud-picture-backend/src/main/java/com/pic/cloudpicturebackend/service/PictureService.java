@@ -2,6 +2,7 @@ package com.pic.cloudpicturebackend.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.pic.cloudpicturebackend.common.BaseResponse;
 import com.pic.cloudpicturebackend.model.dto.picture.PictureQueryRequest;
 import com.pic.cloudpicturebackend.model.dto.picture.PictureReviewRequest;
 import com.pic.cloudpicturebackend.model.dto.picture.PictureUploadByBatchRequest;
@@ -10,6 +11,7 @@ import com.pic.cloudpicturebackend.model.entity.Picture;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pic.cloudpicturebackend.model.entity.User;
 import com.pic.cloudpicturebackend.model.vo.PictureVO;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -49,10 +51,9 @@ public interface PictureService extends IService<Picture> {
      * 获取图片封装类（分页）
      *
      * @param picturePage
-     * @param request
      * @return
      */
-    Page<PictureVO> getPictureVOPage(Page<Picture> picturePage, HttpServletRequest request);
+    Page<PictureVO> getPictureVOPage(Page<Picture> picturePage);
 
     /**
      * 获取查询对象
@@ -86,4 +87,12 @@ public interface PictureService extends IService<Picture> {
      * @return
      */
     Integer uploadPictureByBatch(PictureUploadByBatchRequest pictureUploadByBatchRequest, User loginUser);
+
+    /**
+     * 分页获取图片封装类（Redis + Caffeine 多级缓存）
+     *
+     * @param pictureQueryRequest
+     * @return
+     */
+    Page<PictureVO> listPictureVOByPageWithCache(PictureQueryRequest pictureQueryRequest);
 }

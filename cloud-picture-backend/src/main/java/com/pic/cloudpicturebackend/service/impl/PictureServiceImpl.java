@@ -2,8 +2,11 @@ package com.pic.cloudpicturebackend.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.TypeReference;
 import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -27,12 +30,16 @@ import com.pic.cloudpicturebackend.model.vo.PictureVO;
 import com.pic.cloudpicturebackend.model.vo.UserVO;
 import com.pic.cloudpicturebackend.service.PictureService;
 import com.pic.cloudpicturebackend.service.UserService;
+import com.pic.cloudpicturebackend.utils.CaffeineUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -41,6 +48,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -58,6 +66,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
 
     @Resource
     private UrlPictureUpload urlPictureUpload;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     /**
      * 校验图片
@@ -169,11 +180,10 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
      * 分页获取图片封装
      *
      * @param picturePage
-     * @param request
      * @return
      */
     @Override
-    public Page<PictureVO> getPictureVOPage(Page<Picture> picturePage, HttpServletRequest request) {
+    public Page<PictureVO> getPictureVOPage(Page<Picture> picturePage) {
         List<Picture> pictureList = picturePage.getRecords();
         Page<PictureVO> pictureVOPage = new Page<>(picturePage.getCurrent(), picturePage.getSize(), picturePage.getTotal());
         if (CollUtil.isEmpty(pictureList)) {
@@ -381,6 +391,43 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
             }
         }
         return uploadCount;
+    }
+
+    /**
+     * 分页获取图片封装类（Redis + Caffeine 多级缓存）
+     */
+    @Override
+    public Page<PictureVO> listPictureVOByPageWithCache(PictureQueryRequest pictureQueryRequest) {
+        // 构建缓存的 key
+        String queryCondition = JSONUtil.toJsonStr(pictureQueryRequest);
+        String hashKey = DigestUtils.md5DigestAsHex(queryCondition.getBytes());
+        String cacheKey = "picture:listPictureVOByPage:" + hashKey;
+        // 先查询 Caffeine
+        String cachedValue = CaffeineUtil.getCache().getIfPresent(cacheKey);
+        if (cachedValue != null) {
+            // 缓存命中，返回结果
+            return JSONUtil.toBean(cachedValue, new TypeReference<Page<PictureVO>>() {}, false);
+        }
+        // Caffeine 未命中，查询 Redis
+        cachedValue = stringRedisTemplate.opsForValue().get(cacheKey);
+        if (cachedValue != null) {
+            // 如果缓存命中，更新本地缓存，返回结果
+            CaffeineUtil.getCache().put(cacheKey, cachedValue);
+            return JSONUtil.toBean(cachedValue, new TypeReference<Page<PictureVO>>() {}, false);
+        }
+        // 查询数据库
+        long current = pictureQueryRequest.getCurrent();
+        long size = pictureQueryRequest.getPageSize();
+        Page<Picture> picturePage = this.page(new Page<>(current, size), this.getQueryWrapper(pictureQueryRequest));
+        Page<PictureVO> pictureVOPage = this.getPictureVOPage(picturePage);
+        // 写入数据到 Redis
+        String cacheValue = JSONUtil.toJsonStr(pictureVOPage);
+        // 设置缓存的过期时间，5 - 10 分钟过期（防止缓存雪崩）
+        int cacheExpireTime = 300 + RandomUtil.randomInt(0, 300);
+        stringRedisTemplate.opsForValue().set(cacheKey, cacheValue, cacheExpireTime, TimeUnit.SECONDS);
+        // 写入数据到 Caffeine
+        CaffeineUtil.getCache().put(cacheKey, cacheValue);
+        return pictureVOPage;
     }
 }
 
