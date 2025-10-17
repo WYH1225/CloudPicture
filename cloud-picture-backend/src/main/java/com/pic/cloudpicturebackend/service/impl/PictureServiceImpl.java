@@ -6,6 +6,7 @@ import cn.hutool.core.lang.TypeReference;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -37,7 +38,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
@@ -130,6 +130,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         // 构造 Picture
         Picture picture = new Picture();
         picture.setUrl(uploadPictureResult.getUrl());
+        picture.setThumbnailUrl(uploadPictureResult.getThumbnailUrl());
         // 支持外层传递图片名称
         String picName = uploadPictureResult.getPicName();
         if (pictureUploadRequest != null && StrUtil.isNotBlank(pictureUploadRequest.getPicName())) {
@@ -361,10 +362,21 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         if (ObjUtil.isEmpty(div)) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "获取元素失败");
         }
-        Elements imgElementList = div.select("img.mimg");
+        Elements imgElementList = div.select(".iusc");
         int uploadCount = 0;
         for (Element imgElement : imgElementList) {
-            String fileUrl = imgElement.attr("src");
+            // 获取 data-m 属性中的 json 字符串
+            String dataM = imgElement.attr("m");
+            String fileUrl = "";
+            try {
+                // 解析 json 字符串
+                JSONObject jsonObject = JSONUtil.parseObj(dataM);
+                // 获取 murl 字段（原始图片 url）
+                fileUrl = jsonObject.getStr("murl");
+            } catch (Exception e) {
+                log.error("解析图片数据失败", e);
+                continue;
+            }
             if (StrUtil.isBlank(fileUrl)) {
                 log.info("当前链接为空，已跳过：{}", fileUrl);
                 continue;
