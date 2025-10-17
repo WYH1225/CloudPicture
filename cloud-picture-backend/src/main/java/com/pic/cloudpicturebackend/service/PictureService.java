@@ -95,4 +95,6 @@ public interface PictureService extends IService<Picture> {
      * @return
      */
     Page<PictureVO> listPictureVOByPageWithCache(PictureQueryRequest pictureQueryRequest);
+
+    void clearPictureFile(Picture oldpicture);
 }

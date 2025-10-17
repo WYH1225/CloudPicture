@@ -15,6 +15,7 @@ import com.pic.cloudpicturebackend.constant.CommonConstant;
 import com.pic.cloudpicturebackend.exception.BusinessException;
 import com.pic.cloudpicturebackend.exception.ErrorCode;
 import com.pic.cloudpicturebackend.exception.ThrowUtils;
+import com.pic.cloudpicturebackend.manager.CosManager;
 import com.pic.cloudpicturebackend.manager.upload.FilePictureUpload;
 import com.pic.cloudpicturebackend.manager.upload.PictureUploadTemplate;
 import com.pic.cloudpicturebackend.manager.upload.UrlPictureUpload;
@@ -38,12 +39,15 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +73,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    private CosManager cosManager;
 
     /**
      * 校验图片
@@ -440,6 +447,34 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         // 写入数据到 Caffeine
         CaffeineUtil.getCache().put(cacheKey, cacheValue);
         return pictureVOPage;
+    }
+
+    @Async
+    @Override
+    public void clearPictureFile(Picture oldpicture) {
+        // 判断该图片是否被多条记录使用
+        String pictureUrl = oldpicture.getUrl();
+        long count = this.lambdaQuery()
+                .eq(Picture::getUrl, pictureUrl)
+                .count();
+        // 有不止一条记录用到了该图片，不清理
+        if (count > 1) {
+            return;
+        }
+        try {
+            String picturePath = new URL(pictureUrl).getPath();
+            // 删除图片
+            cosManager.deleteObject(picturePath);
+            // 删除缩略图
+            String thumbnailUrl = oldpicture.getThumbnailUrl();
+            if (StrUtil.isNotBlank(thumbnailUrl)) {
+                String thumbnailPath = new URL(thumbnailUrl).getPath();
+                cosManager.deleteObject(thumbnailPath);
+            }
+        } catch (MalformedURLException e) {
+            log.error("清理图片时出现 URL 格式错误", e);
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "URL 格式错误");
+        }
     }
 }
 
