@@ -27,13 +27,19 @@
               </a-space>
               <template #overlay>
                 <a-menu style="margin: 3px 0 0 15px">
-                  <a-menu-item @click="doLogout">
-                    <a href="javascript:">
+                  <a-menu-item>
+                    <router-link to="/my_space">
                       <a-space>
-                        <LogoutOutlined />
-                        退出登录
+                        <UserOutlined />
+                        我的空间
                       </a-space>
-                    </a>
+                    </router-link>
+                  </a-menu-item>
+                  <a-menu-item @click="doLogout">
+                    <a-space>
+                      <LogoutOutlined />
+                      退出登录
+                    </a-space>
                   </a-menu-item>
                 </a-menu>
               </template>
@@ -49,7 +55,7 @@
 </template>
 <script lang="ts" setup>
 import { computed, h, ref } from 'vue'
-import { HomeOutlined, LogoutOutlined } from '@ant-design/icons-vue'
+import { HomeOutlined, LogoutOutlined, UserOutlined } from '@ant-design/icons-vue'
 import { MenuProps, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import { useLoginUserStore } from '@/stores/useLoginUserStore'
@@ -65,6 +71,11 @@ const originItems = [
     title: '主页',
   },
   {
+    key: '/add_picture',
+    label: '创建图片',
+    title: '创建图片',
+  },
+  {
     key: '/admin/userManage',
     label: '用户管理',
     title: '用户管理',
@@ -75,9 +86,9 @@ const originItems = [
     title: '图片管理',
   },
   {
-    key: '/add_picture',
-    label: '创建图片',
-    title: '创建图片',
+    key: '/admin/spaceManage',
+    label: '空间管理',
+    title: '空间管理',
   },
   {
     key: 'others',
@@ -160,5 +171,4 @@ const doLogout = async () => {
   cursor: pointer;
   background-color: rgba(0, 0, 0, 0.03);
 }
-
 </style>

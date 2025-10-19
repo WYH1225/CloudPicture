@@ -3,10 +3,7 @@ package com.pic.cloudpicturebackend.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pic.cloudpicturebackend.common.BaseResponse;
-import com.pic.cloudpicturebackend.model.dto.picture.PictureQueryRequest;
-import com.pic.cloudpicturebackend.model.dto.picture.PictureReviewRequest;
-import com.pic.cloudpicturebackend.model.dto.picture.PictureUploadByBatchRequest;
-import com.pic.cloudpicturebackend.model.dto.picture.PictureUploadRequest;
+import com.pic.cloudpicturebackend.model.dto.picture.*;
 import com.pic.cloudpicturebackend.model.entity.Picture;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pic.cloudpicturebackend.model.entity.User;
@@ -89,6 +86,14 @@ public interface PictureService extends IService<Picture> {
     Integer uploadPictureByBatch(PictureUploadByBatchRequest pictureUploadByBatchRequest, User loginUser);
 
     /**
+     * 分页获取图片封装类（无缓存）
+     *
+     * @param pictureQueryRequest
+     * @return
+     */
+    Page<PictureVO> listPictureVOByPage(PictureQueryRequest pictureQueryRequest);
+
+    /**
      * 分页获取图片封装类（Redis + Caffeine 多级缓存）
      *
      * @param pictureQueryRequest
@@ -96,5 +101,34 @@ public interface PictureService extends IService<Picture> {
      */
     Page<PictureVO> listPictureVOByPageWithCache(PictureQueryRequest pictureQueryRequest);
 
+    /**
+     * 清理图片文件
+     *
+     * @param oldpicture
+     */
     void clearPictureFile(Picture oldpicture);
+
+    /**
+     * 编辑图片
+     *
+     * @param pictureEditRequest
+     * @param loginUser
+     */
+    void editPicture(PictureEditRequest pictureEditRequest, User loginUser);
+
+    /**
+     * 删除图片
+     *
+     * @param pictureId
+     * @param loginUser
+     */
+    void deletePicture(long pictureId, User loginUser);
+
+    /**
+     * 校验空间图片的权限
+     *
+     * @param loginUser
+     * @param picture
+     */
+    void checkPictureAuth(User loginUser, Picture picture);
 }

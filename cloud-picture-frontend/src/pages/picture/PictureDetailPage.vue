@@ -121,7 +121,13 @@ const router = useRouter()
 
 // 编辑图片
 const doEdit = () => {
-  router.push('/add_picture/?id=' + picture.value.id)
+  router.push({
+    path: "/add_picture",
+    query: {
+      id: picture.value.id,
+      spaceId: picture.value.spaceId
+    }
+  })
 }
 
 // 删除数据
@@ -133,7 +139,12 @@ const doDelete = async () => {
   const res = await deletePictureUsingPost({ id })
   if (res.data.code === 0) {
     message.success('删除成功')
-    await router.push('/')
+    const spaceId = picture.value.spaceId
+    if (spaceId == null) {
+      router.push('/')
+    } else {
+      router.push(`/space/${spaceId}`)
+    }
   } else {
     message.error('删除失败, ' + res.data.message)
   }
