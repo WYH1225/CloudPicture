@@ -7,11 +7,11 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.pic.cloudpicturebackend.common.DeleteRequest;
 import com.pic.cloudpicturebackend.constant.CommonConstant;
 import com.pic.cloudpicturebackend.exception.BusinessException;
 import com.pic.cloudpicturebackend.exception.ErrorCode;
 import com.pic.cloudpicturebackend.exception.ThrowUtils;
-import com.pic.cloudpicturebackend.model.dto.picture.PictureQueryRequest;
 import com.pic.cloudpicturebackend.model.dto.space.SpaceAddRequest;
 import com.pic.cloudpicturebackend.model.dto.space.SpaceQueryRequest;
 import com.pic.cloudpicturebackend.model.entity.Picture;
@@ -20,9 +20,11 @@ import com.pic.cloudpicturebackend.model.entity.User;
 import com.pic.cloudpicturebackend.model.enums.SpaceLevelEnum;
 import com.pic.cloudpicturebackend.model.vo.SpaceVO;
 import com.pic.cloudpicturebackend.model.vo.UserVO;
+import com.pic.cloudpicturebackend.service.PictureService;
 import com.pic.cloudpicturebackend.service.SpaceService;
 import com.pic.cloudpicturebackend.mapper.SpaceMapper;
 import com.pic.cloudpicturebackend.service.UserService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -30,7 +32,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 /**
@@ -41,6 +42,13 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private TransactionTemplate transactionTemplate;
+
+    @Resource
+    @Lazy
+    private PictureService pictureService;
 
     Map<Long, Object> lockMap = new ConcurrentHashMap<>();
 
@@ -193,6 +201,35 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
         queryWrapper.eq(ObjUtil.isNotEmpty(spaceLevel), "spaceLevel", spaceLevel);
         queryWrapper.orderBy(StrUtil.isNotEmpty(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC), sortField);
         return queryWrapper;
+    }
+
+    @Override
+    public boolean deleteSpace(DeleteRequest deleteRequest, HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        long id = deleteRequest.getId();
+        // 判断是否存在
+        Space oldSpace = this.getById(id);
+        ThrowUtils.throwIf(oldSpace == null, ErrorCode.NOT_FOUND_ERROR);
+        // 仅本人或管理员可删除
+        if (!oldSpace.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        // 获取该空间下的所有图片 id
+        Set<Long> idsSet = pictureService.lambdaQuery()
+                .eq(Picture::getSpaceId, id)
+                .list()
+                .stream()
+                .map(Picture::getId)
+                .collect(Collectors.toSet());
+        transactionTemplate.execute(status -> {
+            // 删除该空间下的所有图片
+            idsSet.forEach(pictureId -> pictureService.deletePicture(pictureId, loginUser));
+            // 操作数据库
+            boolean result = this.removeById(id);
+            ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+            return true;
+        });
+        return true;
     }
 }
 

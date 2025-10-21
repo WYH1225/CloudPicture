@@ -2,6 +2,7 @@ package com.pic.cloudpicturebackend.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.pic.cloudpicturebackend.common.DeleteRequest;
 import com.pic.cloudpicturebackend.model.dto.picture.PictureQueryRequest;
 import com.pic.cloudpicturebackend.model.dto.space.SpaceAddRequest;
 import com.pic.cloudpicturebackend.model.dto.space.SpaceQueryRequest;
@@ -67,4 +68,6 @@ public interface SpaceService extends IService<Space> {
      * @return
      */
     QueryWrapper<Space> getQueryWrapper(SpaceQueryRequest spaceQueryRequest);
+
+    boolean deleteSpace(DeleteRequest deleteRequest, HttpServletRequest request);
 }

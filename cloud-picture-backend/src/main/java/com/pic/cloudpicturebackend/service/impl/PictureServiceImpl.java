@@ -202,6 +202,15 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         // 开启事务
         Long finalSpaceId = spaceId;
         transactionTemplate.execute(status -> {
+            Picture oldPicture = this.getById(pictureId);
+            String sizeSql = "totalSize = totalSize + " + picture.getPicSize();
+            String countSql = "totalCount = totalCount + 1";
+            if (pictureId != null) {
+                // 如果是更新，减去原图片的额度
+                sizeSql = sizeSql + " - " + oldPicture.getPicSize();
+                countSql = countSql + " - 1";
+                this.clearPictureFile(oldPicture);
+            }
             // 插入数据
             boolean result = this.saveOrUpdate(picture);
             ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "图片上传失败, 数据库操作失败");
@@ -209,8 +218,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
                 // 更新空间的使用额度
                 boolean update = spaceService.lambdaUpdate()
                         .eq(Space::getId, finalSpaceId)
-                        .setSql("totalSize = totalSize + " + picture.getPicSize())
-                        .setSql("totalCount = totalCount + 1")
+                        .setSql(sizeSql)
+                        .setSql(countSql)
                         .update();
                 ThrowUtils.throwIf(!update, ErrorCode.OPERATION_ERROR, "额度更新失败");
             }

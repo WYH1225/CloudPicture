@@ -57,19 +57,20 @@ public class SpaceController {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userService.getLoginUser(request);
-        long id = deleteRequest.getId();
-        // 判断是否存在
-        Space oldSpace = spaceService.getById(id);
-        ThrowUtils.throwIf(oldSpace == null, ErrorCode.NOT_FOUND_ERROR);
-        // 仅本人或管理员可删除
-        if (!oldSpace.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-        }
-        // 操作数据库
-        boolean result = spaceService.removeById(id);
-        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
-        return ResultUtils.success(true);
+//        User loginUser = userService.getLoginUser(request);
+//        long id = deleteRequest.getId();
+//        // 判断是否存在
+//        Space oldSpace = spaceService.getById(id);
+//        ThrowUtils.throwIf(oldSpace == null, ErrorCode.NOT_FOUND_ERROR);
+//        // 仅本人或管理员可删除
+//        if (!oldSpace.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+//            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+//        }
+//        // 操作数据库
+//        boolean result = spaceService.removeById(id);
+//        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+//        return ResultUtils.success(true);
+        return ResultUtils.success(spaceService.deleteSpace(deleteRequest, request));
     }
     
     /**
