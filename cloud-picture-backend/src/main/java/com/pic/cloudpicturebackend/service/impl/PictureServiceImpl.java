@@ -372,7 +372,6 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         Long id = pictureReviewRequest.getId();
         Integer reviewStatus = pictureReviewRequest.getReviewStatus();
         PictureReviewStatusEnum reviewStatusEnum = PictureReviewStatusEnum.getEnumByValue(reviewStatus);
-        String reviewMessage = pictureReviewRequest.getReviewMessage();
         if (id == null || reviewStatus == null || PictureReviewStatusEnum.REVIEWING.equals(reviewStatusEnum)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -561,13 +560,13 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
     /**
      * 异步清理图片文件
      *
-     * @param oldpicture
+     * @param oldPicture
      */
     @Async
     @Override
-    public void clearPictureFile(Picture oldpicture) {
+    public void clearPictureFile(Picture oldPicture) {
         // 判断该图片是否被多条记录使用
-        String pictureUrl = oldpicture.getUrl();
+        String pictureUrl = oldPicture.getUrl();
         long count = this.lambdaQuery()
                 .eq(Picture::getUrl, pictureUrl)
                 .count();
@@ -580,7 +579,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
             // 删除图片
             cosManager.deleteObject(picturePath);
             // 删除缩略图
-            String thumbnailUrl = oldpicture.getThumbnailUrl();
+            String thumbnailUrl = oldPicture.getThumbnailUrl();
             if (StrUtil.isNotBlank(thumbnailUrl)) {
                 String thumbnailPath = new URL(thumbnailUrl).getPath();
                 cosManager.deleteObject(thumbnailPath);
