@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Caffeine 缓存工具类
  */
-public class CaffeineUtil {
+public class CaffeineUtils {
 
     private static final Cache<String, String> LOCAL_CACHE = Caffeine.newBuilder()
             .initialCapacity(1024)

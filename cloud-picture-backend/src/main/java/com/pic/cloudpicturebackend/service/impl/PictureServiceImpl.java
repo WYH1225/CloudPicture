@@ -31,8 +31,11 @@ import com.pic.cloudpicturebackend.model.vo.UserVO;
 import com.pic.cloudpicturebackend.service.PictureService;
 import com.pic.cloudpicturebackend.service.SpaceService;
 import com.pic.cloudpicturebackend.service.UserService;
-import com.pic.cloudpicturebackend.utils.CaffeineUtil;
+import com.pic.cloudpicturebackend.utils.CaffeineUtils;
+import com.pic.cloudpicturebackend.utils.ColorSimilarUtils;
+import com.pic.cloudpicturebackend.utils.ColorTransformUtils;
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.implementation.bytecode.Throw;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -45,14 +48,13 @@ import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.awt.*;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
-import java.util.Date;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -185,6 +187,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
             picName = pictureUploadRequest.getPicName();
         }
         picture.setName(picName);
+        picture.setPicColor(ColorTransformUtils.getStandardColor(uploadPictureResult.getPicColor()));
         picture.setPicSize(uploadPictureResult.getPicSize());
         picture.setPicWidth(uploadPictureResult.getPicWidth());
         picture.setPicHeight(uploadPictureResult.getPicHeight());
@@ -530,7 +533,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         String hashKey = DigestUtils.md5DigestAsHex(queryCondition.getBytes());
         String cacheKey = "picture:listPictureVOByPage:" + hashKey;
         // 先查询 Caffeine
-        String cachedValue = CaffeineUtil.getCache().getIfPresent(cacheKey);
+        String cachedValue = CaffeineUtils.getCache().getIfPresent(cacheKey);
         if (cachedValue != null) {
             // 缓存命中，返回结果
             return JSONUtil.toBean(cachedValue, new TypeReference<Page<PictureVO>>() {}, false);
@@ -539,7 +542,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         cachedValue = stringRedisTemplate.opsForValue().get(cacheKey);
         if (cachedValue != null) {
             // 如果缓存命中，更新本地缓存，返回结果
-            CaffeineUtil.getCache().put(cacheKey, cachedValue);
+            CaffeineUtils.getCache().put(cacheKey, cachedValue);
             return JSONUtil.toBean(cachedValue, new TypeReference<Page<PictureVO>>() {}, false);
         }
         // 查询数据库
@@ -553,7 +556,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         int cacheExpireTime = 300 + RandomUtil.randomInt(0, 300);
         stringRedisTemplate.opsForValue().set(cacheKey, cacheValue, cacheExpireTime, TimeUnit.SECONDS);
         // 写入数据到 Caffeine
-        CaffeineUtil.getCache().put(cacheKey, cacheValue);
+        CaffeineUtils.getCache().put(cacheKey, cacheValue);
         return pictureVOPage;
     }
 
@@ -665,6 +668,52 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
                 throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
             }
         }
+    }
+
+    /**
+     * 根据图片颜色搜索图片
+     *
+     * @param spaceId
+     * @param pictureColor
+     * @param loginUser
+     * @return
+     */
+    @Override
+    public List<PictureVO> searchPictureByColor(Long spaceId, String pictureColor, User loginUser) {
+        // 校验参数
+        ThrowUtils.throwIf(spaceId == null || StrUtil.isBlank(pictureColor), ErrorCode.PARAMS_ERROR);
+        ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
+        // 校验空间权限
+        Space space = spaceService.getById(spaceId);
+        ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
+        if (!loginUser.getId().equals(space.getUserId())) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有空间访问权限");
+        }
+        // 查询该空间下的所有图片（必须要有主色调）
+        List<Picture> pictureList = this.lambdaQuery()
+                .eq(Picture::getSpaceId, spaceId)
+                .isNotNull(Picture::getPicColor)
+                .list();
+        // 没有图片，返回空列表
+        if (pictureList.isEmpty()) {
+            return CollUtil.newArrayList();
+        }
+        // 将颜色字符串转换为主色调
+        Color targetColor = Color.decode(pictureColor);
+        // 计算相似度并排序
+        return pictureList.stream()
+                .sorted(Comparator.comparingDouble(picture -> {
+                    String hexColor = picture.getPicColor();
+                    // 没有主色调的图片会默认排序到最后
+                    if (StrUtil.isBlank(hexColor)) {
+                        return Double.MAX_VALUE;
+                    }
+                    Color picColor = Color.decode(hexColor);
+                    return -ColorSimilarUtils.calculateSimilarity(picColor, targetColor);
+                }))
+                .limit(12)
+                .map(PictureVO::objToVo)
+                .collect(Collectors.toList());
     }
 }
 

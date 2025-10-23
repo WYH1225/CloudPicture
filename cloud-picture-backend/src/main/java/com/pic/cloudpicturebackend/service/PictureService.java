@@ -9,6 +9,7 @@ import com.pic.cloudpicturebackend.model.entity.User;
 import com.pic.cloudpicturebackend.model.vo.PictureVO;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
 * @description 针对表【picture(图片)】的数据库操作Service
@@ -128,4 +129,14 @@ public interface PictureService extends IService<Picture> {
      * @param picture
      */
     void checkPictureAuth(User loginUser, Picture picture);
+
+    /**
+     * 根据颜色搜索图片
+     *
+     * @param spaceId
+     * @param pictureColor
+     * @param loginUser
+     * @return
+     */
+    List<PictureVO> searchPictureByColor(Long spaceId, String pictureColor, User loginUser);
 }
