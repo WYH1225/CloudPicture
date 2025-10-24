@@ -32,7 +32,7 @@
             <template v-if="showOperation" #actions>
               <a-space @click="(e) => doSearch(picture, e)">
                 <SearchOutlined />
-                以图搜图
+                搜图
               </a-space>
               <a-space @click="(e) => doEdit(picture, e)">
                 <EditOutlined />
@@ -89,11 +89,11 @@ const doEdit = (picture, e) => {
   // 阻止冒泡
   e.stopPropagation()
   router.push({
-    path: "/add_picture",
+    path: '/add_picture',
     query: {
       id: picture.id,
-      spaceId: picture.spaceId
-    }
+      spaceId: picture.spaceId,
+    },
   })
 }
 
