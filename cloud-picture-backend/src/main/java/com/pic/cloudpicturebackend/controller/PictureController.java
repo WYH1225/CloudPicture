@@ -258,12 +258,22 @@ public class PictureController {
      * 按照颜色搜索图片
      */
     @PostMapping("/search/color")
-    public BaseResponse<List<PictureVO>> searchPictureByColor(@RequestBody SearchPictureByColorRequest searchPictureByColorRequest,
-                                                              HttpServletRequest request) {
+    public BaseResponse<List<PictureVO>> searchPictureByColor(@RequestBody SearchPictureByColorRequest searchPictureByColorRequest, HttpServletRequest request) {
         ThrowUtils.throwIf(searchPictureByColorRequest == null, ErrorCode.PARAMS_ERROR);
         Long spaceId = searchPictureByColorRequest.getSpaceId();
         String picColor = searchPictureByColorRequest.getPicColor();
         User loginUser = userService.getLoginUser(request);
         return ResultUtils.success(pictureService.searchPictureByColor(spaceId, picColor, loginUser));
+    }
+
+    /**
+     * 批量编辑图片
+     */
+    @PostMapping("/edit/batch")
+    public BaseResponse<Boolean> editPictureByBatch(@RequestBody PictureEditByBatchRequest pictureEditByBatchRequest, HttpServletRequest request) {
+        ThrowUtils.throwIf(pictureEditByBatchRequest == null, ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(request);
+        pictureService.editPictureByBatch(pictureEditByBatchRequest, loginUser);
+        return ResultUtils.success(true);
     }
 }

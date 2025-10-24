@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="share-modal">
     <a-modal v-model:open="visible" :title="props.title" :footer="false" @cancel="closeModal">
       <h4>复制分享链接</h4>
       <a-typography-link copyable>
