@@ -39,8 +39,7 @@
 </template>
 <script lang="ts" setup>
 import { reactive } from 'vue'
-import { userLoginUsingPost, userRegisterUsingPost } from '@/api/userController.ts'
-import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
+import { userRegisterUsingPost } from '@/api/userController.ts'
 import { message } from 'ant-design-vue'
 import router from '@/router'
 
