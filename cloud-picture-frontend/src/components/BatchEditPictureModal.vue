@@ -23,15 +23,20 @@
             allow-clear
           />
         </a-form-item>
-        <a-form-item name="nameRule" label="命名规则">
+        <a-form-item name="nameRule" label="名称">
           <a-input
             v-model:value="formData.nameRule"
-            placeholder="请输入命名规则，输入 {序号} 可动态生成"
+            placeholder="请输入名称"
             allow-clear
           />
-          <a-typography-text type="secondary">
-            例：输入风景{序号}，将生成“风景1.jpg”、“风景2.jpg”
-          </a-typography-text>
+        </a-form-item>
+        <a-form-item label="命名规则">
+          <a-radio-group v-model:value="radioValue" button-style="solid">
+            <a-space>
+              <a-radio-button value="{序号}">序号</a-radio-button>
+              <a-radio-button value="{序号} ">测试</a-radio-button>
+            </a-space>
+          </a-radio-group>
         </a-form-item>
         <a-form-item>
           <a-button type="primary" html-type="submit" style="width: 100%">提交</a-button>
@@ -57,6 +62,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {})
 
 const visible = ref<boolean>(false)
+const radioValue = ref<string>('{序号}')
 
 const openModal = () => {
   visible.value = true
@@ -86,10 +92,12 @@ const handleSubmit = async (values: any) => {
     return
   }
   const res = await editPictureByBatchUsingPost({
+    ...values,
     pictureIdList: props.pictureList.map((picture) => picture.id),
     spaceId: props.spaceId,
-    ...values,
+    nameRule: formData.nameRule + "" + radioValue.value,
   })
+  console.log(radioValue.value)
   // 操作成功
   if (res.data.code === 0 && res.data.data) {
     message.success('操作成功')

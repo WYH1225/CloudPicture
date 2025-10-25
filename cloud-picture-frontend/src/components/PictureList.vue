@@ -44,7 +44,9 @@
               </a-tooltip>
               <a-tooltip>
                 <template #title>删除</template>
-                <DeleteOutlined @click="(e) => doDelete(picture, e)" />
+                <a-popconfirm title="是否确认删除" @confirm="(e) => doDelete(picture, e)">
+                  <DeleteOutlined @click="(e) => e.stopPropagation()" />
+                </a-popconfirm>
               </a-tooltip>
             </template>
           </a-card>
@@ -110,7 +112,7 @@ const doEdit = (picture, e) => {
 // 删除图片
 const doDelete = async (picture, e) => {
   // 阻止冒泡
-  e.stopPropagation()
+  // e.stopPropagation()
   const id = picture.id
   if (!id) {
     return

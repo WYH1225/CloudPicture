@@ -81,9 +81,11 @@
             <a-button v-if="canEdit" :icon="h(EditOutlined)" type="default" @click="doEdit">
               编辑
             </a-button>
-            <a-button v-if="canEdit" :icon="h(DeleteOutlined)" danger @click="doDelete">
-              删除
-            </a-button>
+            <a-popconfirm title="是否确认删除" @confirm="doDelete">
+              <a-button v-if="canEdit" :icon="h(DeleteOutlined)" danger>
+                删除
+              </a-button>
+            </a-popconfirm>
           </a-space>
         </a-card>
       </a-col>

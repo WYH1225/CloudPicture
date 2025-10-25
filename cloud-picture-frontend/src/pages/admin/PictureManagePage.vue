@@ -4,7 +4,9 @@
       <h2>图片管理</h2>
       <a-space>
         <a-button type="primary" href="/add_picture" target="_blank">+ 创建图片</a-button>
-        <a-button type="primary" href="/add_picture/batch" target="_blank" ghost>+ 批量创建图片</a-button>
+        <a-button type="primary" href="/add_picture/batch" target="_blank" ghost
+          >+ 批量创建图片</a-button
+        >
       </a-space>
     </a-flex>
     <div style="margin-bottom: 16px"></div>
@@ -108,7 +110,9 @@
             <a-button type="link" :href="`/add_picture?id=${record.id}`" target="_blank">
               编辑
             </a-button>
-            <a-button danger @click="doDelete(record.id)">删除</a-button>
+            <a-popconfirm title="是否确认删除" @confirm="doDelete(record.id)">
+              <a-button danger>删除</a-button>
+            </a-popconfirm>
           </a-space>
         </template>
       </template>
@@ -116,7 +120,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, h, onMounted, reactive, ref } from 'vue'
 import {
   deletePictureUsingPost,
   doPictureReviewUsingPost,
@@ -129,6 +133,7 @@ import {
   PIC_REVIEW_STATUS_MAP,
   PIC_REVIEW_STATUS_OPTIONS,
 } from '@/constants/picture.ts'
+import { DeleteOutlined } from '@ant-design/icons-vue'
 
 const columns = [
   {

@@ -55,7 +55,9 @@
             <a-button type="link" :href="`/add_space?id=${record.id}`" target="_blank">
               编辑
             </a-button>
-            <a-button danger @click="doDelete(record.id)">删除</a-button>
+            <a-popconfirm title="是否确认删除" @confirm="doDelete(record.id)">
+              <a-button danger>删除</a-button>
+            </a-popconfirm>
           </a-space>
         </template>
       </template>
