@@ -18,15 +18,31 @@
     </a-tabs>
     <!-- 图片编辑 -->
     <div v-if="picture" class="edit-bar">
-      <a-button :icon="h(EditOutlined)" @click="doEditPicture">编辑图片</a-button>
+      <a-space size="middle">
+        <a-button :icon="h(EditOutlined)" @click="doEditPicture">编辑图片</a-button>
+        <a-button
+          v-if="isImageEligibleForOutPainting(picture)"
+          type="primary"
+          :icon="h(FullscreenOutlined)"
+          @click="doImagePainting"
+        >
+          AI 扩图
+        </a-button>
+      </a-space>
+      <ImageCropper
+        ref="imageCropperRef"
+        :imageUrl="picture?.url"
+        :picture="picture"
+        :spaceId="spaceId"
+        :onSuccess="onCropSuccess"
+      />
+      <ImageOutPainting
+        ref="imageOutPainting"
+        :picture="picture"
+        :spaceId="spaceId"
+        :onSuccess="onImageOutPaintingSuccess"
+      />
     </div>
-    <ImageCropper
-      ref="imageCropperRef"
-      :imageUrl="picture?.url"
-      :picture="picture"
-      :spaceId="spaceId"
-      :onSuccess="onCropSuccess"
-    />
     <!-- 图片信息表单 -->
     <a-form
       v-if="picture"
@@ -85,7 +101,8 @@ import {
 import { useRoute, useRouter } from 'vue-router'
 import UrlPictureUpload from '@/components/UrlPictureUpload.vue'
 import ImageCropper from '@/components/ImageCropper.vue'
-import { EditOutlined } from '@ant-design/icons-vue'
+import { EditOutlined, FullscreenOutlined } from '@ant-design/icons-vue'
+import ImageOutPainting from '@/components/ImageOutPainting.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -115,6 +132,7 @@ const handleSubmit = async (values: any) => {
   if (!pictureId) {
     return
   }
+  const add = !route.query?.id
   const res = await editPictureUsingPost({
     id: pictureId,
     spaceId: spaceId.value,
@@ -122,12 +140,12 @@ const handleSubmit = async (values: any) => {
   })
   // 创建成功
   if (res.data.code === 0 && res.data.data) {
-    message.success('创建成功')
+    message.success(add ? '创建成功' : '修改成功')
     router.push({
       path: `/picture/${pictureId}`,
     })
   } else {
-    message.error('创建失败: ' + res.data.message)
+    message.error((add ? '创建失败: ' : '修改失败: ') + res.data.message)
   }
 }
 
@@ -136,7 +154,6 @@ const tagOptions = ref<string[]>([])
 
 /**
  * 获取标签和分类选项
- * @param values
  */
 const getTagCategoryOptions = async () => {
   const res = await listPictureTagCategoryUsingGet()
@@ -185,6 +202,7 @@ onMounted(() => {
   getOldPicture()
 })
 
+// -------- 图片编辑引用 --------
 const imageCropperRef = ref()
 
 // 编辑图片
@@ -195,6 +213,31 @@ const doEditPicture = () => {
 // 编辑成功事件
 const onCropSuccess = (newPicture: API.PictureVO) => {
   picture.value = newPicture
+}
+
+// -------- AI 扩图引用 --------
+const imageOutPainting = ref()
+
+// AI 扩图
+const doImagePainting = () => {
+  imageOutPainting.value?.openModal()
+}
+
+// AI 扩图保存事件
+const onImageOutPaintingSuccess = (newPicture: API.PictureVO) => {
+  picture.value = newPicture
+}
+
+// 判断图片是否符合 AI 扩图条件
+const isImageEligibleForOutPainting = (picture: API.PictureVO) => {
+  if (!picture?.picWidth || !picture?.picHeight) {
+    return false
+  }
+  const { picWidth, picHeight } = picture
+  const totalPixels = picWidth * picHeight
+  const isPixelCountValid = totalPixels >= 512 * 512 && totalPixels <= 4096 * 4096
+  const isDimensionValid = picWidth >= 512 && picWidth <= 4096 && picHeight >= 512 && picHeight <= 4096
+  return isPixelCountValid && isDimensionValid
 }
 </script>
 

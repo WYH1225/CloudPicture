@@ -32,7 +32,6 @@ const loading = ref<boolean>(false)
 
 /**
  * 上传图片
- * @param file
  */
 const handleUpload = async () => {
   loading.value = true

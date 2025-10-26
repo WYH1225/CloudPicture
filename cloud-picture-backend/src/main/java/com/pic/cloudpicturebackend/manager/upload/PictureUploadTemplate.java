@@ -49,6 +49,9 @@ public abstract class PictureUploadTemplate {
         // 拼接文件上传路径，不使用原始文件名称，增强安全性
         String uploadFileName = String.format("%s_%s.%s", DateUtil.formatDate(new Date()), uuid,
                 FileUtil.getSuffix(originalFilename));
+        if (uploadFileName.contains("?")) {
+            uploadFileName = uploadFileName.split("\\?")[0];
+        }
         final String projectName = "cloud-picture";
         String uploadPath = String.format(projectName + "/%s/%s", uploadPathPrefix, uploadFileName);
         File file = null;

@@ -17,6 +17,8 @@
       :fixed-box="false"
       :auto-crop="true"
       :center-box="true"
+      :full="true"
+      :infoTrue="true"
     />
     <!-- 图片操作 -->
     <div class="image-cropper-actions">
