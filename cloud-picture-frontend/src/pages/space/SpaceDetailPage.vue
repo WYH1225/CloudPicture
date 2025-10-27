@@ -4,15 +4,8 @@
     <a-flex justify="space-between">
       <h2>{{ space.spaceName }}（私有空间）</h2>
       <a-space size="middle">
-        <a-button type="primary" :href="`/add_picture?spaceId=${space.id}`" target="_blank">
-          + 创建图片
-        </a-button>
-        <a-button
-          type="primary"
-          ghost
-          :icon="h(EditOutlined)"
-          @click="doBatchEdit"
-        >
+        <a-button type="primary" @click="doAddPicture"> + 创建图片 </a-button>
+        <a-button type="primary" ghost :icon="h(EditOutlined)" @click="doBatchEdit">
           批量编辑
         </a-button>
         <a-tooltip
@@ -55,6 +48,8 @@
       :pictureList="dataList"
       :onSuccess="onBatchEditPictureSuccess"
     />
+    <!-- 创建图片模态框 -->
+    <AddPictureModal ref="addPictureModalRef" :spaceId="id" :onModalSuccess="onAddPictureSuccess" />
   </div>
 </template>
 
@@ -73,6 +68,7 @@ import { ColorPicker } from 'vue3-colorpicker'
 import 'vue3-colorpicker/style.css'
 import BatchEditPictureModal from '@/components/BatchEditPictureModal.vue'
 import { EditOutlined } from '@ant-design/icons-vue'
+import AddPictureModal from '@/components/AddPictureModal.vue'
 
 interface Props {
   id: string | number
@@ -179,6 +175,18 @@ const onBatchEditPictureSuccess = () => {
 const doBatchEdit = () => {
   if (batchEditPictureModalRef.value) {
     batchEditPictureModalRef.value.openModal()
+  }
+}
+
+const addPictureModalRef = ref()
+
+const onAddPictureSuccess = () => {
+  fetchData()
+}
+
+const doAddPicture = () => {
+  if (addPictureModalRef.value) {
+    addPictureModalRef.value.openModal()
   }
 }
 </script>

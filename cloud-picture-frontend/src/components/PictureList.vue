@@ -33,6 +33,7 @@
               <a-tooltip>
                 <template #title>分享</template>
                 <ShareAltOutlined @click="(e) => doShare(picture, e)" />
+                <ShareModal ref="shareModalRef" :link="shareLink" />
               </a-tooltip>
               <a-tooltip>
                 <template #title>以图搜图</template>
@@ -41,6 +42,7 @@
               <a-tooltip>
                 <template #title>编辑</template>
                 <EditOutlined @click="(e) => doEdit(picture, e)" />
+                <AddPictureModal ref="addPictureModalRef" :pictureId="picture.id" :spaceId="picture.spaceId" :onModalSuccess="onAddPictureSuccess" />
               </a-tooltip>
               <a-tooltip>
                 <template #title>删除</template>
@@ -53,7 +55,6 @@
         </a-list-item>
       </template>
     </a-list>
-    <ShareModal ref="shareModalRef" :link="shareLink" />
   </div>
 </template>
 
@@ -64,6 +65,7 @@ import { deletePictureUsingPost } from '@/api/pictureController.ts'
 import { message } from 'ant-design-vue'
 import ShareModal from '@/components/ShareModal.vue'
 import { ref } from 'vue'
+import AddPictureModal from '@/components/AddPictureModal.vue'
 
 interface Props {
   dataList: API.PictureVO[]
@@ -95,18 +97,20 @@ const doSearch = (picture, e) => {
   window.open(`/search_picture?pictureId=${picture.id}`)
 }
 
+// ----------- 编辑操作 -----------
+const addPictureModalRef = ref()
+
+const onAddPictureSuccess = () => {
+  props.onReload?.()
+}
 
 // 编辑图片
 const doEdit = (picture, e) => {
   // 阻止冒泡
   e.stopPropagation()
-  router.push({
-    path: '/add_picture',
-    query: {
-      id: picture.id,
-      spaceId: picture.spaceId,
-    },
-  })
+  if (addPictureModalRef.value) {
+    addPictureModalRef.value.openModal(picture)
+  }
 }
 
 // 删除图片
