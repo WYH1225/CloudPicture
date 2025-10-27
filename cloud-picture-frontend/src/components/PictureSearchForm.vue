@@ -147,7 +147,7 @@ onMounted(() => {
 // 清理
 const doClear = () => {
   // 取消所有对象的值
-  Object.keys(searchParams).forEach(key => {
+  Object.keys(searchParams).forEach((key) => {
     searchParams[key] = undefined
   })
   // 日期筛选框单独清空，必须定义为空数组，不能为 undefined

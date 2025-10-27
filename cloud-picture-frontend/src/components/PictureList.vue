@@ -42,7 +42,12 @@
               <a-tooltip>
                 <template #title>编辑</template>
                 <EditOutlined @click="(e) => doEdit(picture, e)" />
-                <AddPictureModal ref="addPictureModalRef" :pictureId="picture.id" :spaceId="picture.spaceId" :onModalSuccess="onAddPictureSuccess" />
+                <AddPictureModal
+                  ref="addPictureModalRef"
+                  :pictureId="picture.id"
+                  :spaceId="picture.spaceId"
+                  :onModalSuccess="onAddPictureSuccess"
+                />
               </a-tooltip>
               <a-tooltip>
                 <template #title>删除</template>
@@ -60,7 +65,12 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { ShareAltOutlined, SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons-vue'
+import {
+  ShareAltOutlined,
+  SearchOutlined,
+  EditOutlined,
+  DeleteOutlined,
+} from '@ant-design/icons-vue'
 import { deletePictureUsingPost } from '@/api/pictureController.ts'
 import { message } from 'ant-design-vue'
 import ShareModal from '@/components/ShareModal.vue'

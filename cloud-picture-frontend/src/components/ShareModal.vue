@@ -12,11 +12,11 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref } from 'vue'
 
 interface Props {
-  title?: string,
-  link?: string,
+  title?: string
+  link?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -24,19 +24,18 @@ const props = withDefaults(defineProps<Props>(), {
   link: 'https://baidu.com',
 })
 
-const visible = ref<boolean>(false);
+const visible = ref<boolean>(false)
 
 const openModal = () => {
-  visible.value = true;
-};
+  visible.value = true
+}
 
 const closeModal = () => {
   visible.value = false
-};
+}
 
 // 暴露方法给父组件调用
 defineExpose({
   openModal,
 })
 </script>
-

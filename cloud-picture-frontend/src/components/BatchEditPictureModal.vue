@@ -24,11 +24,7 @@
           />
         </a-form-item>
         <a-form-item name="nameRule" label="名称">
-          <a-input
-            v-model:value="formData.nameRule"
-            placeholder="请输入名称"
-            allow-clear
-          />
+          <a-input v-model:value="formData.nameRule" placeholder="请输入名称" allow-clear />
         </a-form-item>
         <a-form-item label="命名规则">
           <a-radio-group v-model:value="radioValue" button-style="solid">
@@ -95,7 +91,7 @@ const handleSubmit = async (values: any) => {
     ...values,
     pictureIdList: props.pictureList.map((picture) => picture.id),
     spaceId: props.spaceId,
-    nameRule: formData.nameRule + "" + radioValue.value,
+    nameRule: formData.nameRule + '' + radioValue.value,
   })
   console.log(radioValue.value)
   // 操作成功

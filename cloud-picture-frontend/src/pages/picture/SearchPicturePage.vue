@@ -4,11 +4,7 @@
     <h3 style="margin-bottom: 16px">原图</h3>
     <a-card hoverable style="max-width: 280px">
       <template #cover>
-        <img
-          :alt="picture.name"
-          :src="picture.url"
-          object-fit="cover"
-        />
+        <img :alt="picture.name" :src="picture.url" object-fit="cover" />
       </template>
     </a-card>
     <h3 style="margin: 16px 0">搜图结果</h3>
