@@ -210,10 +210,8 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
         // 判断是否存在
         Space oldSpace = this.getById(id);
         ThrowUtils.throwIf(oldSpace == null, ErrorCode.NOT_FOUND_ERROR);
-        // 仅本人或管理员可删除
-        if (!oldSpace.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-        }
+        // 权限校验
+        checkSpaceAuth(oldSpace, loginUser);
         // 获取该空间下的所有图片 id
         Set<Long> idsSet = pictureService.lambdaQuery()
                 .eq(Picture::getSpaceId, id)
@@ -230,6 +228,20 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
             return true;
         });
         return true;
+    }
+
+    /**
+     * 校验空间权限
+     *
+     * @param space
+     * @param loginUser
+     */
+    @Override
+    public void checkSpaceAuth(Space space, User loginUser) {
+        // 仅本人或管理员可编辑
+        if (!space.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
     }
 }
 

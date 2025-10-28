@@ -13,6 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+/**
+ * 阿里云百炼 AI 接口
+ */
 @Slf4j
 @Component
 public class AliYunAiApi {
@@ -20,8 +23,13 @@ public class AliYunAiApi {
     @Value("${aliYunAi.apikey}")
     private String apikey;
 
+    // AI 模型名称
+    private static final String modelName = "qwen-vl-ocr-2025-08-28";
+
+    // 创建扩图任务接口
     private static final String CREATE_OUT_PAINTING_TASK_URL = "https://dashscope.aliyuncs.com/api/v1/services/aigc/image2image/out-painting";
 
+    // 查询扩图任务接口
     private static final String GET_OUT_PAINTING_TASK_URL = "https://dashscope.aliyuncs.com/api/v1/tasks/%s";
 
     /**
@@ -45,7 +53,8 @@ public class AliYunAiApi {
                 log.error("请求异常: {}", httpResponse.body());
                 throw new BusinessException(ErrorCode.OPERATION_ERROR, "AI 扩图失败");
             }
-            CreateOutPaintingTaskResponse createOutPaintingTaskResponse = JSONUtil.toBean(httpResponse.body(), CreateOutPaintingTaskResponse.class);
+            CreateOutPaintingTaskResponse createOutPaintingTaskResponse =
+                    JSONUtil.toBean(httpResponse.body(), CreateOutPaintingTaskResponse.class);
             if (createOutPaintingTaskResponse.getCode() != null) {
                 String errorMessage = createOutPaintingTaskResponse.getMessage();
                 log.error("请求异常: {}", errorMessage);

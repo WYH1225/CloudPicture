@@ -66,5 +66,20 @@ public interface SpaceService extends IService<Space> {
      */
     QueryWrapper<Space> getQueryWrapper(SpaceQueryRequest spaceQueryRequest);
 
+    /**
+     * 删除空间
+     *
+     * @param deleteRequest
+     * @param request
+     * @return
+     */
     boolean deleteSpace(DeleteRequest deleteRequest, HttpServletRequest request);
+
+    /**
+     * 校验空间权限
+     *
+     * @param space
+     * @param loginUser
+     */
+    void checkSpaceAuth(Space space, User loginUser);
 }
