@@ -93,20 +93,22 @@
           {{ dayjs(record.editTime).format('YYYY-MM-DD HH:mm:ss') }}
         </template>
         <template v-else-if="column.key === 'action'">
-          <a-space wrap>
+          <a-space direction="vertical">
             <a-button
               v-if="record.reviewStatus !== PIC_REVIEW_STATUS_ENUM.PASS"
               type="link"
               @click="handleReview(record, PIC_REVIEW_STATUS_ENUM.PASS)"
-              >通过</a-button
             >
+              通过
+            </a-button>
             <a-button
               v-if="record.reviewStatus !== PIC_REVIEW_STATUS_ENUM.REJECT"
               type="link"
               danger
               @click="handleReview(record, PIC_REVIEW_STATUS_ENUM.REJECT)"
-              >拒绝</a-button
             >
+              拒绝
+            </a-button>
             <a-button type="link" :href="`/add_picture?id=${record.id}`" target="_blank">
               编辑
             </a-button>
