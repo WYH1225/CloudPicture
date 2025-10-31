@@ -29,8 +29,8 @@ import com.pic.cloudpicturebackend.model.entity.Picture;
 import com.pic.cloudpicturebackend.model.entity.Space;
 import com.pic.cloudpicturebackend.model.entity.User;
 import com.pic.cloudpicturebackend.model.enums.PictureReviewStatusEnum;
-import com.pic.cloudpicturebackend.model.vo.PictureVO;
-import com.pic.cloudpicturebackend.model.vo.UserVO;
+import com.pic.cloudpicturebackend.model.vo.picture.PictureVO;
+import com.pic.cloudpicturebackend.model.vo.user.UserVO;
 import com.pic.cloudpicturebackend.service.PictureService;
 import com.pic.cloudpicturebackend.service.SpaceService;
 import com.pic.cloudpicturebackend.service.UserService;
@@ -288,7 +288,10 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
                 .collect(Collectors.toMap(User::getId, user -> user));
         pictureVOList.forEach(pictureVO -> {
             Long userId = pictureVO.getUserId();
-            User user = userIdUserMap.get(userId);
+            User user = null;
+            if (userIdUserMap.containsKey(userId)) {
+                user = userIdUserMap.get(userId);
+            }
             pictureVO.setUser(userService.getUserVO(user));
         });
         pictureVOPage.setRecords(pictureVOList);
@@ -614,7 +617,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         Picture oldPicture = this.getById(id);
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
         // 校验权限
-        checkPictureAuth(loginUser, oldPicture);
+        // 弃用，已经改为使用 Sa-Token 的注解鉴权
+//        checkPictureAuth(loginUser, oldPicture);
         // 填充审核参数
         this.fillReviewParams(picture, loginUser);
         // 操作数据库
@@ -630,7 +634,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         Picture oldPicture = this.getById(pictureId);
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
         // 校验权限
-        checkPictureAuth(loginUser, oldPicture);
+        // 弃用，已经改为使用 Sa-Token 的注解鉴权
+//        checkPictureAuth(loginUser, oldPicture);
         Long spaceId = oldPicture.getSpaceId();
         // 开启事务
         transactionTemplate.execute(status -> {
@@ -781,7 +786,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         Picture picture = this.getById(pictureId);
         ThrowUtils.throwIf(picture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
         // 权限校验
-        checkPictureAuth(loginUser, picture);
+        // 弃用，已经改为使用 Sa-Token 的注解鉴权
+//        checkPictureAuth(loginUser, picture);
         // 创建扩图任务
         CreateOutPaintingTaskRequest createOutPaintingTaskRequest = new CreateOutPaintingTaskRequest();
         CreateOutPaintingTaskRequest.Input input = new CreateOutPaintingTaskRequest.Input();

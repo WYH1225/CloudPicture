@@ -1,8 +1,9 @@
-package com.pic.cloudpicturebackend.model.vo;
+package com.pic.cloudpicturebackend.model.vo.picture;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
 import com.pic.cloudpicturebackend.model.entity.Picture;
+import com.pic.cloudpicturebackend.model.vo.user.UserVO;
 import lombok.Data;
 
 import java.io.Serializable;

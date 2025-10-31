@@ -14,7 +14,7 @@ import com.pic.cloudpicturebackend.model.dto.space.*;
 import com.pic.cloudpicturebackend.model.entity.Space;
 import com.pic.cloudpicturebackend.model.entity.User;
 import com.pic.cloudpicturebackend.model.enums.SpaceLevelEnum;
-import com.pic.cloudpicturebackend.model.vo.SpaceVO;
+import com.pic.cloudpicturebackend.model.vo.space.SpaceVO;
 import com.pic.cloudpicturebackend.service.SpaceService;
 import com.pic.cloudpicturebackend.service.UserService;
 import org.springframework.web.bind.annotation.*;

@@ -3,12 +3,11 @@ package com.pic.cloudpicturebackend.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.pic.cloudpicturebackend.api.aliyunai.model.CreateOutPaintingTaskRequest;
 import com.pic.cloudpicturebackend.api.aliyunai.model.CreateOutPaintingTaskResponse;
 import com.pic.cloudpicturebackend.model.dto.picture.*;
 import com.pic.cloudpicturebackend.model.entity.Picture;
 import com.pic.cloudpicturebackend.model.entity.User;
-import com.pic.cloudpicturebackend.model.vo.PictureVO;
+import com.pic.cloudpicturebackend.model.vo.picture.PictureVO;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;

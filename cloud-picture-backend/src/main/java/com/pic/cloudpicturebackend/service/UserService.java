@@ -1,14 +1,13 @@
 package com.pic.cloudpicturebackend.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.pic.cloudpicturebackend.model.dto.user.UserLoginRequest;
 import com.pic.cloudpicturebackend.model.dto.user.UserQueryRequest;
 import com.pic.cloudpicturebackend.model.dto.user.UserRegisterRequest;
 import com.pic.cloudpicturebackend.model.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.pic.cloudpicturebackend.model.vo.LoginUserVO;
-import com.pic.cloudpicturebackend.model.vo.UserVO;
+import com.pic.cloudpicturebackend.model.vo.user.LoginUserVO;
+import com.pic.cloudpicturebackend.model.vo.user.UserVO;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;

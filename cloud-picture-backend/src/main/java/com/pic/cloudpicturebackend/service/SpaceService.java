@@ -8,7 +8,7 @@ import com.pic.cloudpicturebackend.model.dto.space.SpaceAddRequest;
 import com.pic.cloudpicturebackend.model.dto.space.SpaceQueryRequest;
 import com.pic.cloudpicturebackend.model.entity.Space;
 import com.pic.cloudpicturebackend.model.entity.User;
-import com.pic.cloudpicturebackend.model.vo.SpaceVO;
+import com.pic.cloudpicturebackend.model.vo.space.SpaceVO;
 
 import javax.servlet.http.HttpServletRequest;
 

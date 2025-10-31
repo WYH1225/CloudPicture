@@ -12,8 +12,8 @@ import com.pic.cloudpicturebackend.exception.ErrorCode;
 import com.pic.cloudpicturebackend.exception.ThrowUtils;
 import com.pic.cloudpicturebackend.model.dto.user.*;
 import com.pic.cloudpicturebackend.model.entity.User;
-import com.pic.cloudpicturebackend.model.vo.LoginUserVO;
-import com.pic.cloudpicturebackend.model.vo.UserVO;
+import com.pic.cloudpicturebackend.model.vo.user.LoginUserVO;
+import com.pic.cloudpicturebackend.model.vo.user.UserVO;
 import com.pic.cloudpicturebackend.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
