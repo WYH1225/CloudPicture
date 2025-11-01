@@ -706,7 +706,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
                 .list();
         // 没有图片，返回空列表
         if (pictureList.isEmpty()) {
-            return CollUtil.newArrayList();
+            return Collections.emptyList();
         }
         // 将颜色字符串转换为主色调
         Color targetColor = Color.decode(pictureColor);

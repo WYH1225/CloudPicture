@@ -180,9 +180,11 @@ public class StpInterfaceImpl implements StpInterface {
         SpaceUserAuthContext authRequest;
         // 获取请求参数
         if (ContentType.JSON.getValue().equals(contentType)) {
+            // 处理 POST 请求，获取 body，转换成对象
             String body = ServletUtil.getBody(request);
             authRequest = JSONUtil.toBean(body, SpaceUserAuthContext.class);
         } else {
+            // 处理 GET 请求，获取参数，转换成对象
             Map<String, String> paramMap = ServletUtil.getParamMap(request);
             authRequest = BeanUtil.toBean(paramMap, SpaceUserAuthContext.class);
         }
@@ -206,7 +208,6 @@ public class StpInterfaceImpl implements StpInterface {
                     authRequest.setSpaceId(id);
                     break;
                 default:
-                    break;
             }
         }
         return authRequest;

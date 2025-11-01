@@ -16,6 +16,7 @@ import com.pic.cloudpicturebackend.constant.UserConstant;
 import com.pic.cloudpicturebackend.exception.BusinessException;
 import com.pic.cloudpicturebackend.exception.ErrorCode;
 import com.pic.cloudpicturebackend.exception.ThrowUtils;
+import com.pic.cloudpicturebackend.manager.auth.SpaceUserAuthManager;
 import com.pic.cloudpicturebackend.manager.auth.StpKit;
 import com.pic.cloudpicturebackend.manager.auth.annotation.SaSpaceCheckPermission;
 import com.pic.cloudpicturebackend.manager.auth.model.SpaceUserPermissionConstant;
@@ -52,6 +53,9 @@ public class PictureController {
 
     @Resource
     private AliYunAiApi aliYunAiApi;
+
+    @Resource
+    private SpaceUserAuthManager spaceUserAuthManager;
 
     /**
      * 上传图片（可重新上传）
@@ -154,15 +158,23 @@ public class PictureController {
         ThrowUtils.throwIf(picture == null, ErrorCode.NOT_FOUND_ERROR);
         // 空间权限校验
         Long spaceId = picture.getSpaceId();
+        Space space = null;
         if (spaceId != null) {
             boolean hasPermission = StpKit.SPACE.hasPermission(SpaceUserPermissionConstant.PICTURE_VIEW);
             ThrowUtils.throwIf(!hasPermission, ErrorCode.NO_AUTH_ERROR);
-//            User loginUser = userService.getLoginUser(request);
             // 弃用，已经改为使用 Sa-Token 的注解鉴权
+//            User loginUser = userService.getLoginUser(request);
 //            pictureService.checkPictureAuth(loginUser, picture);
+            space = spaceService.getById(spaceId);
+            ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
         }
+        // 获取权限列表
+        User loginUser = userService.getLoginUser(request);
+        List<String> permissionList = spaceUserAuthManager.getPermissionList(space, loginUser);
         // 获取封装类
-        return ResultUtils.success(pictureService.getPictureVO(picture, request));
+        PictureVO pictureVO = pictureService.getPictureVO(picture, request);
+        pictureVO.setPermissionList(permissionList);
+        return ResultUtils.success(pictureVO);
     }
 
     /**

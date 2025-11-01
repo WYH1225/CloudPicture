@@ -10,6 +10,7 @@ import com.pic.cloudpicturebackend.constant.UserConstant;
 import com.pic.cloudpicturebackend.exception.BusinessException;
 import com.pic.cloudpicturebackend.exception.ErrorCode;
 import com.pic.cloudpicturebackend.exception.ThrowUtils;
+import com.pic.cloudpicturebackend.manager.auth.SpaceUserAuthManager;
 import com.pic.cloudpicturebackend.model.dto.space.*;
 import com.pic.cloudpicturebackend.model.entity.Space;
 import com.pic.cloudpicturebackend.model.entity.User;
@@ -36,8 +37,12 @@ public class SpaceController {
     @Resource
     private UserService userService;
 
+    @Resource
+    private SpaceUserAuthManager spaceUserAuthManager;
+
     /**
      * 创建空间
+     *
      * @param spaceAddRequest
      * @param request
      * @return
@@ -57,19 +62,6 @@ public class SpaceController {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-//        User loginUser = userService.getLoginUser(request);
-//        long id = deleteRequest.getId();
-//        // 判断是否存在
-//        Space oldSpace = spaceService.getById(id);
-//        ThrowUtils.throwIf(oldSpace == null, ErrorCode.NOT_FOUND_ERROR);
-//        // 仅本人或管理员可删除
-//        if (!oldSpace.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
-//            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-//        }
-//        // 操作数据库
-//        boolean result = spaceService.removeById(id);
-//        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
-//        return ResultUtils.success(true);
         return ResultUtils.success(spaceService.deleteSpace(deleteRequest, request));
     }
     
@@ -124,8 +116,13 @@ public class SpaceController {
         // 查询数据库
         Space space = spaceService.getById(id);
         ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR);
+        // 获取权限列表
+        User loginUser = userService.getLoginUser(request);
+        List<String> permissionList = spaceUserAuthManager.getPermissionList(space, loginUser);
         // 获取封装类
-        return ResultUtils.success(spaceService.getSpaceVO(space, request));
+        SpaceVO spaceVO = spaceService.getSpaceVO(space, request);
+        spaceVO.setPermissionList(permissionList);
+        return ResultUtils.success(spaceVO);
     }
 
     /**
