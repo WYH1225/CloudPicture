@@ -12,6 +12,7 @@ import com.pic.cloudpicturebackend.constant.CommonConstant;
 import com.pic.cloudpicturebackend.exception.BusinessException;
 import com.pic.cloudpicturebackend.exception.ErrorCode;
 import com.pic.cloudpicturebackend.exception.ThrowUtils;
+import com.pic.cloudpicturebackend.manager.sharding.DynamicShardingManager;
 import com.pic.cloudpicturebackend.model.dto.space.SpaceAddRequest;
 import com.pic.cloudpicturebackend.model.dto.space.SpaceQueryRequest;
 import com.pic.cloudpicturebackend.model.entity.Picture;
@@ -56,6 +57,11 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
 
     @Resource
     private SpaceUserService spaceUserService;
+
+    // 为了方便部署，暂时不使用分表
+//    @Resource
+//    @Lazy
+//    private DynamicShardingManager dynamicShardingManager;
 
     Map<Long, Object> lockMap = new ConcurrentHashMap<>();
 
@@ -108,6 +114,9 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
                     result = spaceUserService.save(spaceUser);
                     ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "创建团队成员记录失败");
                 }
+                // 为了方便部署，暂时不使用分表
+//                // 创建分表（仅对团队空间生效）
+//                dynamicShardingManager.createSpacePictureTable(space);
                 return space.getId();
             } finally {
                 lockMap.remove(userId);
@@ -228,7 +237,6 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
         Integer spaceType = spaceQueryRequest.getSpaceType();
         String sortField = spaceQueryRequest.getSortField();
         String sortOrder = spaceQueryRequest.getSortOrder();
-
         // 拼接查询条件
         queryWrapper.eq(ObjUtil.isNotEmpty(id), "id", id);
         queryWrapper.eq(ObjUtil.isNotEmpty(userId), "userId", userId);
