@@ -266,6 +266,13 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
         transactionTemplate.execute(status -> {
             // 删除该空间下的所有图片
             idsSet.forEach(pictureId -> pictureService.deletePicture(pictureId, loginUser));
+            // 如果该空间是团队空间，删除 SpaceUser 关联数据
+            if (SpaceTypeEnum.TEAM.getValue() == oldSpace.getSpaceType()) {
+                boolean result = spaceUserService.lambdaUpdate()
+                        .eq(SpaceUser::getSpaceId, id)
+                        .remove();
+                ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+            }
             // 操作数据库
             boolean result = this.removeById(id);
             ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);

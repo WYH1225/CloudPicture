@@ -29,7 +29,7 @@ export function downloadImage(url?: string, fileName?: string) {
  *
  * @param input
  */
-export function toHexColor(input) {
+export function toHexColor(input: any) {
   // 去掉 0x 前缀
   const colorValue = input.startsWith('0x') ? input.slice(2) : input
 

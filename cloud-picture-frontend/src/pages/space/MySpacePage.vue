@@ -1,5 +1,5 @@
 <template>
-  <div id="mySpacePage">
+  <div id="mySpacePage" style="display: none">
     <p>正在跳转，请稍等...</p>
   </div>
 </template>

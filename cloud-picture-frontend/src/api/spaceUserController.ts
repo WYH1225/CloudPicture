@@ -2,8 +2,8 @@
 /* eslint-disable */
 import request from '@/request.ts'
 
-/** addSapceUser POST /api/spaceUser/add */
-export async function addSapceUserUsingPost(
+/** addSpaceUser POST /api/spaceUser/add */
+export async function addSpaceUserUsingPost(
   body: API.SpaceUserAddRequest,
   options?: { [key: string]: any }
 ) {

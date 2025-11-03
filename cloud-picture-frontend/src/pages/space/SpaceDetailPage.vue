@@ -2,9 +2,19 @@
   <div id="spaceDetailPage">
     <!-- 空间信息 -->
     <a-flex justify="space-between">
-      <h2>{{ space.spaceName }}（私有空间）</h2>
+      <h2>{{ space.spaceName }}（{{ SPACE_TYPE_MAP[Number(space.spaceType)] }}）</h2>
       <a-space size="middle">
         <a-button type="primary" @click="doAddPicture">+ 创建图片</a-button>
+        <a-button
+          v-if="space.spaceType === SPACE_TYPE_ENUM.TEAM"
+          type="primary"
+          ghost
+          :icon="h(TeamOutlined)"
+          :href="`/spaceUserManage/${id}`"
+          target="_blank"
+        >
+          成员管理
+        </a-button>
         <a-button
           type="primary"
           ghost
@@ -61,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { h, onMounted, ref } from 'vue'
+import { h, onMounted, ref, watch } from 'vue'
 import { getSpaceVoByIdUsingGet } from '@/api/spaceController.ts'
 import { message } from 'ant-design-vue'
 import {
@@ -74,8 +84,10 @@ import PictureSearchForm from '@/components/PictureSearchForm.vue'
 import { ColorPicker } from 'vue3-colorpicker'
 import 'vue3-colorpicker/style.css'
 import BatchEditPictureModal from '@/components/BatchEditPictureModal.vue'
-import { EditOutlined, BarChartOutlined } from '@ant-design/icons-vue'
+import { EditOutlined, BarChartOutlined, TeamOutlined } from '@ant-design/icons-vue'
 import AddPictureModal from '@/components/AddPictureModal.vue'
+import { SPACE_TYPE_ENUM, SPACE_TYPE_MAP } from '@/constants/space.ts'
+import { useRoute } from 'vue-router'
 
 interface Props {
   id: string | number
@@ -196,6 +208,19 @@ const doAddPicture = () => {
     addPictureModalRef.value.openModal()
   }
 }
+
+// 监听路由变化，当空间 ID 改变时重新加载数据
+const route = useRoute()
+watch(
+  () => route.params.id,
+  (newId, oldId) => {
+    if (newId && newId !== oldId) {
+      // 重新加载空间详情和图片列表
+      fetchSpaceDetail()
+      fetchData()
+    }
+  },
+)
 </script>
 
 <style scoped>

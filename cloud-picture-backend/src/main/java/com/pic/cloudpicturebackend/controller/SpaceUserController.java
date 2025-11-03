@@ -44,7 +44,7 @@ public class SpaceUserController {
      */
     @PostMapping("/add")
     @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.SPACE_USER_MANAGE)
-    public BaseResponse<Long> addSapceUser(@RequestBody SpaceUserAddRequest spaceUserAddRequest) {
+    public BaseResponse<Long> addSpaceUser(@RequestBody SpaceUserAddRequest spaceUserAddRequest) {
         ThrowUtils.throwIf(spaceUserAddRequest == null, ErrorCode.PARAMS_ERROR);
         return ResultUtils.success(spaceUserService.addUserSpace(spaceUserAddRequest));
     }
