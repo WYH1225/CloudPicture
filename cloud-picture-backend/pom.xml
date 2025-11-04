@@ -50,7 +50,12 @@
             <artifactId>caffeine</artifactId>
             <version>3.1.8</version>
         </dependency>
-        <!-- Sa-Token 权限认证，在线文档：https://sa-token.cc -->
+        <!-- websocket -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+        <!-- Sa-Token 权限认证 -->
         <dependency>
             <groupId>cn.dev33</groupId>
             <artifactId>sa-token-spring-boot-starter</artifactId>
