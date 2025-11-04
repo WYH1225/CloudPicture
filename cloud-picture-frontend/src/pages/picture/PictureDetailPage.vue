@@ -81,8 +81,8 @@
             <a-button v-if="canEdit" :icon="h(EditOutlined)" type="default" @click="doEdit">
               编辑
             </a-button>
-            <a-popconfirm title="是否确认删除" @confirm="doDelete">
-              <a-button v-if="canEdit" :icon="h(DeleteOutlined)" danger> 删除 </a-button>
+            <a-popconfirm v-if="canDelete" title="是否确认删除" @confirm="doDelete">
+              <a-button :icon="h(DeleteOutlined)" danger>删除</a-button>
             </a-popconfirm>
           </a-space>
         </a-card>
@@ -103,9 +103,9 @@ import {
   ShareAltOutlined,
 } from '@ant-design/icons-vue'
 import { downloadImage, formatSize, toHexColor } from '@/utils'
-import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
 import { useRouter } from 'vue-router'
 import ShareModal from '@/components/ShareModal.vue'
+import { SPACE_PERMISSION_ENUM } from '@/constants/space.ts'
 
 interface Props {
   id: string | number
@@ -114,17 +114,16 @@ interface Props {
 const props = defineProps<Props>()
 const picture = ref<API.PictureVO>({})
 
-const loginUserStore = useLoginUserStore()
+// 通用权限检查函数
+function createPermissionChecker(permission: string) {
+  return computed(() => {
+    return (picture.value.permissionList ?? []).includes(permission)
+  })
+}
 
-// 判断当前用户是否可以编辑图片
-const canEdit = computed(() => {
-  const loginUser = loginUserStore.loginUser
-  if (!loginUser.id) {
-    return false
-  }
-  const user = picture.value.user || {}
-  return loginUser.id === user.id || loginUser.userRole === 'admin'
-})
+// 定义权限检查
+const canEdit = createPermissionChecker(SPACE_PERMISSION_ENUM.PICTURE_EDIT)
+const canDelete = createPermissionChecker(SPACE_PERMISSION_ENUM.PICTURE_DELETE)
 
 // 获取图片详情
 const fetchPictureDetail = async () => {

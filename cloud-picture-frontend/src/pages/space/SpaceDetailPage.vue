@@ -4,9 +4,9 @@
     <a-flex justify="space-between">
       <h2>{{ space.spaceName }}（{{ SPACE_TYPE_MAP[Number(space.spaceType)] }}）</h2>
       <a-space size="middle">
-        <a-button type="primary" @click="doAddPicture">+ 创建图片</a-button>
+        <a-button v-if="canUploadPicture" type="primary" @click="doAddPicture">+ 创建图片</a-button>
         <a-button
-          v-if="space.spaceType === SPACE_TYPE_ENUM.TEAM"
+          v-if="canManageSpaceUser && space.spaceType === SPACE_TYPE_ENUM.TEAM"
           type="primary"
           ghost
           :icon="h(TeamOutlined)"
@@ -16,6 +16,7 @@
           成员管理
         </a-button>
         <a-button
+          v-if="canManageSpaceUser"
           type="primary"
           ghost
           :icon="h(BarChartOutlined)"
@@ -24,7 +25,7 @@
         >
           空间分析
         </a-button>
-        <a-button :icon="h(EditOutlined)" @click="doBatchEdit">批量编辑</a-button>
+        <a-button v-if="canEditPicture" :icon="h(EditOutlined)" @click="doBatchEdit">批量编辑</a-button>
         <a-tooltip
           :title="`占用空间 ${formatSize(space.totalSize)} / ${formatSize(space.maxSize)}`"
         >
@@ -48,6 +49,8 @@
       :dataList="dataList"
       :loading="loading"
       :showOperation="true"
+      :canEdit="canEditPicture"
+      :canDelete="canDeletePicture"
       :onReload="fetchData"
     />
     <!-- 分页 -->
@@ -71,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { h, onMounted, ref, watch } from 'vue'
+import { computed, h, onMounted, ref, watch } from 'vue'
 import { getSpaceVoByIdUsingGet } from '@/api/spaceController.ts'
 import { message } from 'ant-design-vue'
 import {
@@ -86,7 +89,7 @@ import 'vue3-colorpicker/style.css'
 import BatchEditPictureModal from '@/components/BatchEditPictureModal.vue'
 import { EditOutlined, BarChartOutlined, TeamOutlined } from '@ant-design/icons-vue'
 import AddPictureModal from '@/components/AddPictureModal.vue'
-import { SPACE_TYPE_ENUM, SPACE_TYPE_MAP } from '@/constants/space.ts'
+import { SPACE_PERMISSION_ENUM, SPACE_TYPE_ENUM, SPACE_TYPE_MAP } from '@/constants/space.ts'
 import { useRoute } from 'vue-router'
 
 interface Props {
@@ -95,6 +98,18 @@ interface Props {
 
 const props = defineProps<Props>()
 const space = ref<API.SpaceVO>({})
+
+function createPermissionChecker(permission: string) {
+  return computed(() => {
+    return (space.value.permissionList ?? []).includes(permission)
+  })
+}
+
+// 定义权限检查
+const canManageSpaceUser = createPermissionChecker(SPACE_PERMISSION_ENUM.SPACE_USER_MANAGE)
+const canUploadPicture = createPermissionChecker(SPACE_PERMISSION_ENUM.PICTURE_UPLOAD)
+const canEditPicture = createPermissionChecker(SPACE_PERMISSION_ENUM.PICTURE_EDIT)
+const canDeletePicture = createPermissionChecker(SPACE_PERMISSION_ENUM.PICTURE_DELETE)
 
 // ---------------- 获取空间详情 ----------------
 const fetchSpaceDetail = async () => {

@@ -39,7 +39,7 @@
                 <template #title>以图搜图</template>
                 <SearchOutlined @click="(e) => doSearch(picture, e)" />
               </a-tooltip>
-              <a-tooltip>
+              <a-tooltip v-if="canEdit">
                 <template #title>编辑</template>
                 <EditOutlined @click="(e) => doEdit(picture, e)" />
                 <AddPictureModal
@@ -49,7 +49,7 @@
                   :onModalSuccess="onAddPictureSuccess"
                 />
               </a-tooltip>
-              <a-tooltip>
+              <a-tooltip v-if="canDelete">
                 <template #title>删除</template>
                 <a-popconfirm title="是否确认删除" @confirm="(e) => doDelete(picture, e)">
                   <DeleteOutlined @click="(e) => e.stopPropagation()" />
@@ -81,6 +81,8 @@ interface Props {
   dataList: API.PictureVO[]
   loading?: boolean
   showOperation?: boolean
+  canEdit?: boolean
+  canDelete?: boolean
   onReload?: () => void
 }
 
@@ -88,6 +90,8 @@ const props = withDefaults(defineProps<Props>(), {
   dataList: () => [],
   loading: false,
   showOperation: false,
+  canEdit: false,
+  canDelete: false,
 })
 
 const router = useRouter()
