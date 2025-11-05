@@ -2,18 +2,14 @@ package com.pic.cloudpicturebackend.manager.websocket;
 
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
-import com.pic.cloudpicturebackend.exception.BusinessException;
 import com.pic.cloudpicturebackend.manager.auth.SpaceUserAuthManager;
 import com.pic.cloudpicturebackend.manager.auth.model.SpaceUserPermissionConstant;
-import com.pic.cloudpicturebackend.manager.auth.model.SpaceUserRole;
 import com.pic.cloudpicturebackend.model.entity.Picture;
 import com.pic.cloudpicturebackend.model.entity.Space;
 import com.pic.cloudpicturebackend.model.entity.User;
-import com.pic.cloudpicturebackend.model.enums.SpaceRoleEnum;
 import com.pic.cloudpicturebackend.model.enums.SpaceTypeEnum;
 import com.pic.cloudpicturebackend.service.PictureService;
 import com.pic.cloudpicturebackend.service.SpaceService;
-import com.pic.cloudpicturebackend.service.SpaceUserService;
 import com.pic.cloudpicturebackend.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.server.ServerHttpRequest;
