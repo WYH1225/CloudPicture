@@ -5,6 +5,7 @@ import cn.hutool.json.JSONUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.pic.cloudpicturebackend.manager.websocket.disruptor.PictureEditEventProducer;
 import com.pic.cloudpicturebackend.manager.websocket.model.PictureEditActionEnum;
 import com.pic.cloudpicturebackend.manager.websocket.model.PictureEditMessageTypeEnum;
 import com.pic.cloudpicturebackend.manager.websocket.model.PictureEditRequestMessage;
@@ -12,6 +13,7 @@ import com.pic.cloudpicturebackend.manager.websocket.model.PictureEditResponseMe
 import com.pic.cloudpicturebackend.model.entity.User;
 import com.pic.cloudpicturebackend.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -33,6 +35,10 @@ public class PictureEditHandler extends TextWebSocketHandler {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    @Lazy
+    private PictureEditEventProducer pictureEditEventProducer;
 
     // 每张图片的编辑状态，key: pictureId, value: 当前正在编辑的用户 ID
     private final Map<Long, Long> pictureEditingUsers = new ConcurrentHashMap<>();
@@ -76,32 +82,11 @@ public class PictureEditHandler extends TextWebSocketHandler {
         super.handleTextMessage(session, message);
         // 获取消息内容，将 JSON 转换为 PictureEditRequestMessage
         PictureEditRequestMessage pictureEditRequestMessage = JSONUtil.toBean(message.getPayload(), PictureEditRequestMessage.class);
-        String type = pictureEditRequestMessage.getType();
-        PictureEditMessageTypeEnum pictureEditMessageTypeEnum = PictureEditMessageTypeEnum.getEnumByValue(type);
         // 从 Session 属性中获取到公共参数
         User user = (User) session.getAttributes().get("user");
         Long pictureId = (Long) session.getAttributes().get("pictureId");
-        // 根据消息类型处理消息
-        switch (pictureEditMessageTypeEnum) {
-            case ENTER_EDIT:
-                handleEnterEditMessage(pictureEditRequestMessage, session, user, pictureId);
-                break;
-            case EXIT_EDIT:
-                handleExitEditMessage(pictureEditRequestMessage, session, user, pictureId);
-                break;
-            case EDIT_ACTION:
-                handleEditActionMessage(pictureEditRequestMessage, session, user, pictureId);
-                break;
-            default:
-                // 其它消息类型，返回错误提示
-                PictureEditResponseMessage pictureEditResponseMessage = new PictureEditResponseMessage();
-                pictureEditResponseMessage.setType(PictureEditMessageTypeEnum.ERROR.getValue());
-                pictureEditResponseMessage.setMessage("消息类型错误");
-                pictureEditResponseMessage.setUser(userService.getUserVO(user));
-                session.sendMessage(new TextMessage(jsonLongToString(pictureEditResponseMessage)));
-                break;
-        }
-
+        // 根据消息类型处理消息（生产消息到 Disruptor 环形队列中）
+        pictureEditEventProducer.publishEvent(pictureEditRequestMessage, session, user, pictureId);
     }
 
     /**
@@ -116,7 +101,7 @@ public class PictureEditHandler extends TextWebSocketHandler {
         // 没有用户正在编辑该图片，才能进入编辑
         if (!pictureEditingUsers.containsKey(pictureId)) {
             // 设置用户为正在编辑该图片
-            pictureEditingUsers.put(pictureId, user.getId());
+            pictureEditingUsers.putIfAbsent(pictureId, user.getId());
             // 构造响应，发送进入编辑的消息通知
             PictureEditResponseMessage pictureEditResponseMessage = new PictureEditResponseMessage();
             pictureEditResponseMessage.setType(PictureEditMessageTypeEnum.ENTER_EDIT.getValue());
@@ -257,7 +242,7 @@ public class PictureEditHandler extends TextWebSocketHandler {
      * @param pictureEditResponseMessage 图片编辑响应消息
      * @return JSON 字符串
      */
-    private String jsonLongToString(PictureEditResponseMessage pictureEditResponseMessage) throws IOException {
+    public String jsonLongToString(PictureEditResponseMessage pictureEditResponseMessage) throws IOException {
         // 创建 ObjectMapper
         ObjectMapper objectMapper = new ObjectMapper();
         // 配置序列化：将 Long 类型转为 String，解决丢失精度问题
