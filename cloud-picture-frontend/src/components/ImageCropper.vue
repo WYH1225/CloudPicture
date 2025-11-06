@@ -21,7 +21,7 @@
       :infoTrue="true"
     />
     <!-- 协同编辑操作 -->
-    <div class="image-edit-actions">
+    <div class="image-edit-actions" v-if="isTeamSpace">
       <a-space class="button-group">
         <a-button v-if="editingUser" disabled>{{ editingUser.userName }} 正在编辑</a-button>
         <a-button v-if="canEnterEdit" type="primary" ghost @click="enterEdit">进入编辑</a-button>
@@ -32,13 +32,13 @@
     <!-- 图片操作 -->
     <div class="image-cropper-actions">
       <a-space class="button-group">
-        <a-button @click="rotateLeft" :disabled="!canExitEdit">向左旋转</a-button>
-        <a-button @click="rotateRight" :disabled="!canExitEdit">向右旋转</a-button>
-        <a-button @click="changeScale(1)" :disabled="!canExitEdit">放大</a-button>
-        <a-button @click="changeScale(-1)" :disabled="!canExitEdit">缩小</a-button>
-        <a-button type="primary" :loading="loading" @click="handleConfirm" :disabled="!canExitEdit"
-          >确认</a-button
-        >
+        <a-button @click="rotateLeft" :disabled="!canEdit">向左旋转</a-button>
+        <a-button @click="rotateRight" :disabled="!canEdit">向右旋转</a-button>
+        <a-button @click="changeScale(1)" :disabled="!canEdit">放大</a-button>
+        <a-button @click="changeScale(-1)" :disabled="!canEdit">缩小</a-button>
+        <a-button type="primary" :loading="loading" @click="handleConfirm" :disabled="!canEdit">
+          确认
+        </a-button>
       </a-space>
     </div>
   </a-modal>
@@ -51,15 +51,22 @@ import { message } from 'ant-design-vue'
 import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
 import PictureEditWebSocket from '@/utils/pictureEditWebSocket.ts'
 import { PICTURE_EDIT_ACTION_ENUM, PICTURE_EDIT_MESSAGE_TYPE_ENUM } from '@/constants/picture.ts'
+import { SPACE_TYPE_ENUM } from '@/constants/space.ts'
 
 interface Props {
   imageUrl?: string
   picture?: API.PictureVO
   spaceId?: number
+  space?: API.SpaceVO
   onSuccess?: (newPicture: API.PictureVO) => void
 }
 
 const props = defineProps<Props>()
+
+// 是否为团队空间
+const isTeamSpace = computed(() => {
+  return props.space?.spaceType === SPACE_TYPE_ENUM.TEAM
+})
 
 // 获取图片裁切器的引用
 const cropperRef = ref()
@@ -161,6 +168,11 @@ const canExitEdit = computed(() => {
 })
 // 可以点击编辑图片的操作按钮
 const canEdit = computed(() => {
+  // 不是团队空间，默认就可以编辑
+  if (!isTeamSpace.value) {
+    return true
+  }
+  // 团队空间，只有有编辑权限的用户才能进入编辑
   return editingUser.value?.id === loginUser?.id
 })
 
@@ -206,16 +218,16 @@ const initWebsocket = () => {
     // 根据收到的编辑操作，执行相应的操作
     switch (msg.editAction) {
       case PICTURE_EDIT_ACTION_ENUM.ROTATE_LEFT:
-        cropperRef.value.rotateLeft()
+        cropperRef.value?.rotateLeft()
         break
       case PICTURE_EDIT_ACTION_ENUM.ROTATE_RIGHT:
-        cropperRef.value.rotateRight()
+        cropperRef.value?.rotateRight()
         break
       case PICTURE_EDIT_ACTION_ENUM.ZOOM_IN:
-        cropperRef.value.changeScale(1)
+        cropperRef.value?.changeScale(1)
         break
       case PICTURE_EDIT_ACTION_ENUM.ZOOM_OUT:
-        cropperRef.value.changeScale(-1)
+        cropperRef.value?.changeScale(-1)
         break
     }
   })
@@ -229,7 +241,10 @@ const initWebsocket = () => {
 
 // 监听属性 和 visible 的变化， 初始化 WebSocket 连接
 watchEffect(() => {
-  initWebsocket()
+  // 只有团队空间，才初始化 WebSocket
+  if (isTeamSpace.value) {
+    initWebsocket()
+  }
 })
 
 // 组件销毁时， 断开 WebSocket 链接

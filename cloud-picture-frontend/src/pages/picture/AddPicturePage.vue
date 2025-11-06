@@ -34,6 +34,7 @@
         :imageUrl="picture?.url"
         :picture="picture"
         :spaceId="spaceId"
+        :space="space"
         :onSuccess="onCropSuccess"
       />
       <ImageOutPainting
@@ -91,7 +92,7 @@
 
 <script lang="ts" setup>
 import PictureUpload from '@/components/PictureUpload.vue'
-import { computed, onMounted, reactive, ref, h } from 'vue'
+import { computed, onMounted, reactive, ref, h, watchEffect } from 'vue'
 import { message } from 'ant-design-vue'
 import {
   editPictureUsingPost,
@@ -103,6 +104,7 @@ import UrlPictureUpload from '@/components/UrlPictureUpload.vue'
 import ImageCropper from '@/components/ImageCropper.vue'
 import { EditOutlined, FullscreenOutlined } from '@ant-design/icons-vue'
 import ImageOutPainting from '@/components/ImageOutPainting.vue'
+import { getSpaceVoByIdUsingGet } from '@/api/spaceController.ts'
 
 const router = useRouter()
 const route = useRoute()
@@ -239,6 +241,23 @@ const isImageEligibleForOutPainting = (picture: API.PictureVO) => {
   const isDimensionValid = picWidth >= 512 && picWidth <= 4096 && picHeight >= 512 && picHeight <= 4096
   return isPixelCountValid && isDimensionValid
 }
+
+// 获取空间信息
+const space = ref<API.SpaceVO>()
+const fetchSpace = async () => {
+  if (spaceId.value) {
+    const res = await getSpaceVoByIdUsingGet({
+      id: spaceId.value,
+    })
+    if (res.data.code === 0 && res.data.data) {
+      space.value = res.data.data
+    }
+  }
+}
+
+watchEffect(() => {
+  fetchSpace()
+})
 </script>
 
 <style scoped>
